@@ -30,22 +30,31 @@
         </select>
 
         <label>Marco del ojo:</label>
+        @* <select @bind="TempEyeFrameShapeStr" class="form-select">
+            @foreach (var shape in Enum.GetNames(typeof(EyeFrameShape)))
+            {
+                <option value="@shape">@shape</option>
+            }
+        </select> *@
+        <label>Marco del ojo:</label>
         <select @bind="TempEyeFrameShapeStr" class="form-select">
             @foreach (var shape in Enum.GetNames(typeof(EyeFrameShape)))
             {
                 <option value="@shape">@shape</option>
             }
         </select>
+
         <label>Color marco ojo:</label>
         <input type="color" @bind="TempEyeFrameColor" />
 
-        <label>Centro del ojo:</label>
+        <label>Forma del Ojo:</label>
         <select @bind="TempEyeCenterShapeStr" class="form-select">
-            @foreach (var shape in Enum.GetNames(typeof(EyeCenterShape)))
+            @foreach (var center in AllowedCenters)
             {
-                <option value="@shape">@shape</option>
+                <option value="@center">@center</option>
             }
         </select>
+
         <label>Color centro ojo:</label>
         <input type="color" @bind="TempEyeCenterColor" />
 
@@ -71,15 +80,15 @@
         <CustomQrCode Content="@Content"
                       ModuleShapeStr="@ModuleShapeStr"
                       ModuleColor="@ModuleColor"
-                      EyeFrameShapeStr="@EyeFrameShapeStr"
+                      EyeFrameShapeStr="@TempEyeFrameShapeStr"
                       EyeFrameColor="@EyeFrameColor"
-                      EyeCenterShapeStr="@EyeCenterShapeStr"
+                      EyeCenterShapeStr="@TempEyeCenterShapeStr"
                       EyeCenterColor="@EyeCenterColor"
                       BackgroundGradient="@BgColor"
                       ExportFormatStr="@ExportFormatStr"
                       Size="@Size"
                       CorrectionLevelStr="@CorrectionLevelStr"
-                      LogoBase64="@LogoBase64" />
+                      LogoBase64="@LogoBase64"/>
     </div>
 </div>
 
@@ -102,9 +111,11 @@
     public string TempContent { get; set; }
     public string TempModuleShapeStr { get; set; }
     public string TempModuleColor { get; set; }
-    public string TempEyeFrameShapeStr { get; set; }
+
     public string TempEyeFrameColor { get; set; }
-    public string TempEyeCenterShapeStr { get; set; }
+
+    //public string TempEyeCenterShapeStr { get; set; } = EyeCenterShape.Square.ToString();
+
     public string TempEyeCenterColor { get; set; }
     public string TempBgColor { get; set; }
     public string TempExportFormatStr { get; set; }
@@ -112,8 +123,71 @@
     public string TempCorrectionLevelStr { get; set; }
     public string TempLogoBase64 { get; set; }
 
+    // Campos privados de backing
+    private string tempEyeFrameShapeStr = "Square";
+    private string tempEyeCenterShapeStr = "Square";
+
+    // Enum en uso
+    public EyeFrameShape TempEyeFrameShape { get; set; } = EyeFrameShape.Square;
+    public EyeCenterShape TempEyeCenterShape { get; set; } = EyeCenterShape.Square;
+    public List<EyeCenterShape> AllowedCenters { get; set; } = new List<EyeCenterShape>();
+
+
+    public string TempEyeFrameShapeStr
+    {
+        get => tempEyeFrameShapeStr;
+        set
+        {
+            if (tempEyeFrameShapeStr != value)
+            {
+                tempEyeFrameShapeStr = value;
+                TempEyeFrameShape = Enum.Parse<EyeFrameShape>(value);
+                AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+
+                // Si Leaf o Diamond, fuerza el centro a ser igual al marco
+                if (TempEyeFrameShape == EyeFrameShape.Leaf || TempEyeFrameShape == EyeFrameShape.Diamond)
+                {
+                    TempEyeCenterShape = (EyeCenterShape)Enum.Parse(typeof(EyeCenterShape), TempEyeFrameShape.ToString());
+                    TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+                }
+                // Si la forma actual no está permitida, cambia a la primera
+                else if (!AllowedCenters.Contains(TempEyeCenterShape))
+                {
+                    TempEyeCenterShape = AllowedCenters[0];
+                    TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+                }
+
+                StateHasChanged();
+            }
+        }
+    }
+
+    public string TempEyeCenterShapeStr
+    {
+        get => tempEyeCenterShapeStr;
+        set
+        {
+            if (tempEyeCenterShapeStr != value)
+            {
+                tempEyeCenterShapeStr = value;
+                TempEyeCenterShape = Enum.Parse<EyeCenterShape>(value);
+            }
+        }
+    }
+
     protected override void OnInitialized()
     {
+        // Inicializa enums desde los strings
+        TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
+        TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
+
+        AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+        if (!AllowedCenters.Contains(TempEyeCenterShape))
+        {
+            TempEyeCenterShape = AllowedCenters[0];
+            TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        }
+
         TempContent = Content;
         TempModuleShapeStr = ModuleShapeStr;
         TempModuleColor = ModuleColor;
@@ -130,6 +204,18 @@
 
     private void GenerateQr()
     {
+        // Actualiza enums desde los strings
+        TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
+        TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
+
+        AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+
+        if (!AllowedCenters.Contains(TempEyeCenterShape))
+        {
+            TempEyeCenterShape = AllowedCenters[0];
+            TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        }
+
         Content = TempContent;
         ModuleShapeStr = TempModuleShapeStr;
         ModuleColor = TempModuleColor;
@@ -151,6 +237,46 @@
         var buffer = new byte[file.Size];
         await file.OpenReadStream().ReadAsync(buffer, 0, (int)file.Size);
         TempLogoBase64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    // Cuando el usuario cambia el marco del ojo
+    private void OnFrameShapeChanged(ChangeEventArgs e)
+    {
+        // Si usas string, convierte a Enum
+        TempEyeFrameShapeStr = e.Value.ToString();
+        TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
+        AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+
+        // Para Leaf o Diamond: fuerza a que la forma del ojo sea igual que el marco (por defecto)
+        if (TempEyeFrameShape == EyeFrameShape.Leaf || TempEyeFrameShape == EyeFrameShape.Diamond)
+        {
+            TempEyeCenterShape = (EyeCenterShape)Enum.Parse(typeof(EyeCenterShape), TempEyeFrameShape.ToString());
+            TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        }
+        else if (!AllowedCenters.Contains(TempEyeCenterShape))
+        {
+            TempEyeCenterShape = AllowedCenters[0];
+            TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        }
+
+        StateHasChanged();
+    }
+
+    public List<EyeCenterShape> GetAllowedCenters(EyeFrameShape marco)
+    {
+        // Si es Leaf o Diamond: solo ellos + Circle
+        if (marco == EyeFrameShape.Leaf)
+            return new List<EyeCenterShape> { EyeCenterShape.Leaf, EyeCenterShape.Circle };
+        if (marco == EyeFrameShape.Diamond)
+            return new List<EyeCenterShape> { EyeCenterShape.Diamond, EyeCenterShape.Circle };
+        // Para el resto, todas las opciones
+        return Enum.GetValues(typeof(EyeCenterShape)).Cast<EyeCenterShape>().ToList();
+    }
+
+    private void OnCenterShapeChanged()
+    {
+        //TempEyeCenterShapeStr = e.Value.ToString();
+        TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
     }
 
     private void DownloadSvg()

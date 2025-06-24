@@ -161,7 +161,7 @@ namespace CustomizableQrCode.QrCodeRenderer
                     // Centro (pupila)
                     string d3 = GetDiamondPath(ex + r, ey + r, r * 0.25);
                     sb.AppendLine($"<path d='{d3}' fill='{eyeCenterColor}'/>");
-                    continue;
+                    //continue;
 
                 }
                 else if (eyeFrameShape == EyeFrameShape.Point)
@@ -173,7 +173,7 @@ namespace CustomizableQrCode.QrCodeRenderer
                     sb.AppendLine($"<circle cx='{ex + r}' cy='{ey + r}' r='{R}' fill='{eyeFrameColor}'/>");
                     sb.AppendLine($"<circle cx='{ex + r}' cy='{ey + r}' r='{r2}' fill='#fff'/>");
                     sb.AppendLine($"<circle cx='{ex + r}' cy='{ey + r}' r='{r3}' fill='{eyeCenterColor}'/>");
-                    continue;
+                    //continue;
 
                 }
                 else if (eyeFrameShape == EyeFrameShape.Leaf)
@@ -186,7 +186,7 @@ namespace CustomizableQrCode.QrCodeRenderer
                     sb.AppendLine(DrawLeafEye(ex + eyeSize * 0.19, ey + eyeSize * 0.19, eyeSize * 0.62, "#fff"));
                     // Centro (más pequeño aún)
                     sb.AppendLine(DrawLeafEye(ex + eyeSize * 0.33, ey + eyeSize * 0.33, eyeSize * 0.34, eyeCenterColor));
-                    continue; // No dibujes el rect blanco ni el centro cuadrado
+                    //continue; // No dibujes el rect blanco ni el centro cuadrado
 
                 }
                 else
@@ -196,17 +196,94 @@ namespace CustomizableQrCode.QrCodeRenderer
                         $"<rect x='{ex + strokeWidth / 2}' y='{ey + strokeWidth / 2}' width='{eyeSize - strokeWidth}' height='{eyeSize - strokeWidth}' fill='none' stroke='{eyeFrameColor}' stroke-width='{strokeWidth}'/>");
                 }
 
-                // --- CENTRO BLANCO ---
-                double inner = moduleSize * 3;
-                double offset = moduleSize * 2;
-                sb.AppendLine(
-                    $"<rect x='{ex + offset}' y='{ey + offset}' width='{inner}' height='{inner}' fill='#fff' rx='{moduleSize * 0.5}'/>");
+                //// --- CENTRO BLANCO ---
+                //double inner = moduleSize * 3;
+                //double offset = moduleSize * 2;
+                //sb.AppendLine(
+                //    $"<rect x='{ex + offset}' y='{ey + offset}' width='{inner}' height='{inner}' fill='#fff' rx='{moduleSize * 0.5}'/>");
 
-                // --- PUPILA (centro real del ojo) ---
-                double center = moduleSize * 1.2;
-                sb.AppendLine(
-                    $"<rect x='{ex + offset + center}' y='{ey + offset + center}' width='{inner - center * 2}' height='{inner - center * 2}' " +
-                    $"fill='{eyeCenterColor}' rx='{moduleSize * 0.25}'/>");
+                //// --- PUPILA (centro real del ojo) ---
+                //double center = moduleSize * 1.2;
+                //sb.AppendLine(
+                //    $"<rect x='{ex + offset + center}' y='{ey + offset + center}' width='{inner - center * 2}' height='{inner - center * 2}' " +
+                //    $"fill='{eyeCenterColor}' rx='{moduleSize * 0.25}'/>");
+
+                // --- CENTRO DEL OJO (solo Circle permitido para Diamond/Leaf) ---
+                EyeCenterShape allowedShape = eyeCenterShape;
+                if (eyeFrameShape == EyeFrameShape.Leaf )
+                {
+                    if (eyeCenterShape == EyeCenterShape.Circle)
+                    {
+                        allowedShape = EyeCenterShape.Circle;
+                    }
+                    else
+                    {
+                        allowedShape = EyeCenterShape.Leaf;
+                    }
+                }
+                else if (eyeFrameShape == EyeFrameShape.Diamond)
+                {
+                    if (eyeCenterShape == EyeCenterShape.Circle)
+                    {
+                        allowedShape = EyeCenterShape.Circle;
+                    }
+                    else
+                    {
+                        allowedShape = EyeCenterShape.Diamond;
+                    }
+                }
+
+                // Ajusta el centro para cada forma
+                //if (allowedShape == EyeCenterShape.Circle)
+                //{
+                //    sb.AppendLine($"<circle cx='{cx}' cy='{cy}' r='{eyeSize * 0.22}' fill='{eyeCenterColor}'/>");
+                //}
+                //else if (allowedShape == EyeCenterShape.Square)
+                //{
+                //    double sz = eyeSize * 0.42;
+                //    sb.AppendLine($"<rect x='{cx - sz / 2}' y='{cy - sz / 2}' width='{sz}' height='{sz}' fill='{eyeCenterColor}'/>");
+                //}
+                //else if (allowedShape == EyeCenterShape.Rounded)
+                //{
+                //    double sz = eyeSize * 0.42;
+                //    sb.AppendLine($"<rect x='{cx - sz / 2}' y='{cy - sz / 2}' width='{sz}' height='{sz}' rx='{sz * 0.28}' fill='{eyeCenterColor}'/>");
+                //}
+                //else if (allowedShape == EyeCenterShape.Point)
+                //{
+                //    sb.AppendLine($"<circle cx='{cx}' cy='{cy}' r='{eyeSize * 0.13}' fill='{eyeCenterColor}'/>");
+                //}
+                if (allowedShape == EyeCenterShape.Circle)
+                {
+                    sb.AppendLine($"<circle cx='{cx}' cy='{cy}' r='{eyeSize * 0.22}' fill='{eyeCenterColor}'/>");
+                }
+                else if (allowedShape == EyeCenterShape.Square)
+                {
+                    double sz = eyeSize * 0.42;
+                    sb.AppendLine($"<rect x='{cx - sz / 2}' y='{cy - sz / 2}' width='{sz}' height='{sz}' fill='{eyeCenterColor}'/>");
+                }
+                else if (allowedShape == EyeCenterShape.Rounded)
+                {
+                    double sz = eyeSize * 0.42;
+                    sb.AppendLine($"<rect x='{cx - sz / 2}' y='{cy - sz / 2}' width='{sz}' height='{sz}' rx='{sz * 0.28}' fill='{eyeCenterColor}'/>");
+                }
+                else if (allowedShape == EyeCenterShape.Point)
+                {
+                    sb.AppendLine($"<circle cx='{cx}' cy='{cy}' r='{eyeSize * 0.13}' fill='{eyeCenterColor}'/>");
+                }
+                else if (allowedShape == EyeCenterShape.Diamond)
+                {
+                    double rDia = eyeSize * 0.22;
+                    string d = GetDiamondPath(cx, cy, rDia);
+                    sb.AppendLine($"<path d='{d}' fill='{eyeCenterColor}'/>");
+                }
+                else if (allowedShape == EyeCenterShape.Leaf)
+                {
+                    // Puedes ajustar el path como gustes
+                    double leafSize = eyeSize * 0.42;
+                    string leaf = $"M{cx} {cy - leafSize / 2} Q {cx + leafSize / 2} {cy} {cx} {cy + leafSize / 2} Q {cx - leafSize / 2} {cy} {cx} {cy - leafSize / 2} Z";
+                    sb.AppendLine($"<path d='{leaf}' fill='{eyeCenterColor}'/>");
+                }
+
             }
 
             // Renderizar logo central (si existe)
