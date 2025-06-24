@@ -1,0 +1,160 @@
+﻿@rendermode InteractiveServer
+@using CustomizableQrCode
+@using CustomizableQrCode.DemoBlazor.Components.Blazor
+@using CustomizableQrCode.Models
+@using static CustomizableQrCode.Models.QrModels
+@using Microsoft.AspNetCore.Components.Forms
+
+@page "/"
+
+<h3>Personaliza tu Código QR</h3>
+
+<div style="display:flex;gap:2rem;">
+    <div style="min-width:320px;">
+
+        <label>Contenido:</label>
+        <input @bind="TempContent" class="form-control" />
+
+        <label>Color QR:</label>
+        <input type="color" @bind="TempModuleColor" />
+
+        <label>Color de Fondo:</label>
+        <input type="color" @bind="TempBgColor" />
+
+        <label>Forma de módulos:</label>
+        <select @bind="TempModuleShapeStr" class="form-select">
+            @foreach (var shape in Enum.GetNames(typeof(ModuleShape)))
+            {
+                <option value="@shape">@shape</option>
+            }
+        </select>
+
+        <label>Marco del ojo:</label>
+        <select @bind="TempEyeFrameShapeStr" class="form-select">
+            @foreach (var shape in Enum.GetNames(typeof(EyeFrameShape)))
+            {
+                <option value="@shape">@shape</option>
+            }
+        </select>
+        <label>Color marco ojo:</label>
+        <input type="color" @bind="TempEyeFrameColor" />
+
+        <label>Centro del ojo:</label>
+        <select @bind="TempEyeCenterShapeStr" class="form-select">
+            @foreach (var shape in Enum.GetNames(typeof(EyeCenterShape)))
+            {
+                <option value="@shape">@shape</option>
+            }
+        </select>
+        <label>Color centro ojo:</label>
+        <input type="color" @bind="TempEyeCenterColor" />
+
+        <label>Tamaño (px):</label>
+        <input type="number" min="128" max="2048" @bind="TempSize" />
+
+        <label>Nivel corrección error:</label>
+        <select @bind="TempCorrectionLevelStr" class="form-select">
+            @foreach (var level in Enum.GetNames(typeof(QrCorrectionLevel)))
+            {
+                <option value="@level">@level</option>
+            }
+        </select>
+
+        <label>Logo central:</label>
+        <InputFile OnChange="OnLogoChanged" accept="image/*" />
+
+        <button class="btn btn-success mt-3" @onclick="GenerateQr">Generar QR</button>
+        <button class="btn btn-primary mt-3 ms-2" @onclick="DownloadSvg">Descargar SVG</button>
+    </div>
+
+    <div style="background:#fff;padding:1rem;border-radius:12px;box-shadow:0 2px 8px #ccc;">
+        <CustomQrCode Content="@Content"
+                      ModuleShapeStr="@ModuleShapeStr"
+                      ModuleColor="@ModuleColor"
+                      EyeFrameShapeStr="@EyeFrameShapeStr"
+                      EyeFrameColor="@EyeFrameColor"
+                      EyeCenterShapeStr="@EyeCenterShapeStr"
+                      EyeCenterColor="@EyeCenterColor"
+                      BackgroundGradient="@BgColor"
+                      ExportFormatStr="@ExportFormatStr"
+                      Size="@Size"
+                      CorrectionLevelStr="@CorrectionLevelStr"
+                      LogoBase64="@LogoBase64" />
+    </div>
+</div>
+
+@code {
+    // Variables para mostrar QR
+    public string Content { get; set; } = "https://midominio.com";
+    public string ModuleShapeStr { get; set; } = "Square";
+    public string ModuleColor { get; set; } = "#4a90e2";
+    public string EyeFrameShapeStr { get; set; } = "Square";
+    public string EyeFrameColor { get; set; } = "#000000";
+    public string EyeCenterShapeStr { get; set; } = "Square";
+    public string EyeCenterColor { get; set; } = "#000000";
+    public string BgColor { get; set; } = "#ffffff";
+    public string ExportFormatStr { get; set; } = "Svg";
+    public int Size { get; set; } = 512;
+    public string CorrectionLevelStr { get; set; } = "Q";
+    public string LogoBase64 { get; set; }
+
+    // Variables temporales para el formulario
+    public string TempContent { get; set; }
+    public string TempModuleShapeStr { get; set; }
+    public string TempModuleColor { get; set; }
+    public string TempEyeFrameShapeStr { get; set; }
+    public string TempEyeFrameColor { get; set; }
+    public string TempEyeCenterShapeStr { get; set; }
+    public string TempEyeCenterColor { get; set; }
+    public string TempBgColor { get; set; }
+    public string TempExportFormatStr { get; set; }
+    public int TempSize { get; set; }
+    public string TempCorrectionLevelStr { get; set; }
+    public string TempLogoBase64 { get; set; }
+
+    protected override void OnInitialized()
+    {
+        TempContent = Content;
+        TempModuleShapeStr = ModuleShapeStr;
+        TempModuleColor = ModuleColor;
+        TempEyeFrameShapeStr = EyeFrameShapeStr;
+        TempEyeFrameColor = EyeFrameColor;
+        TempEyeCenterShapeStr = EyeCenterShapeStr;
+        TempEyeCenterColor = EyeCenterColor;
+        TempBgColor = BgColor;
+        TempExportFormatStr = ExportFormatStr;
+        TempSize = Size;
+        TempCorrectionLevelStr = CorrectionLevelStr;
+        TempLogoBase64 = LogoBase64;
+    }
+
+    private void GenerateQr()
+    {
+        Content = TempContent;
+        ModuleShapeStr = TempModuleShapeStr;
+        ModuleColor = TempModuleColor;
+        EyeFrameShapeStr = TempEyeFrameShapeStr;
+        EyeFrameColor = TempEyeFrameColor;
+        EyeCenterShapeStr = TempEyeCenterShapeStr;
+        EyeCenterColor = TempEyeCenterColor;
+        BgColor = TempBgColor;
+        ExportFormatStr = TempExportFormatStr;
+        Size = TempSize;
+        CorrectionLevelStr = TempCorrectionLevelStr;
+        LogoBase64 = TempLogoBase64;
+        StateHasChanged();
+    }
+
+    public async Task OnLogoChanged(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer, 0, (int)file.Size);
+        TempLogoBase64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    private void DownloadSvg()
+    {
+        // Implementa la descarga (JS interop o download link)
+    }
+}
