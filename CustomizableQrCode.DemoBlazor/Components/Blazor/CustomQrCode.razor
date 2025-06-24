@@ -10,17 +10,12 @@
     [Parameter] public int Size { get; set; }
     [Parameter] public string LogoBase64 { get; set; }
 
-    // [Parameter] public string ModuleShape { get; set; }
-    // [Parameter] public string EyeFrameShape { get; set; }
-    // [Parameter] public string EyeCenterShape { get; set; }
-    // [Parameter] public string ExportFormat { get; set; }
-    // [Parameter] public string CorrectionLevel { get; set; }
-
     [Parameter] public string ModuleShapeStr { get; set; }
     [Parameter] public string EyeFrameShapeStr { get; set; }
     [Parameter] public string EyeCenterShapeStr { get; set; }
     [Parameter] public string ExportFormatStr { get; set; }
     [Parameter] public string CorrectionLevelStr { get; set; }
+
 
 
     private string? SvgContent;
@@ -33,6 +28,8 @@
         var eyeCenterShape = TryParseEnum<EyeCenterShape>(EyeCenterShapeStr, EyeCenterShape.Square);
         var exportFormat = TryParseEnum<QrExportFormat>(ExportFormatStr, QrExportFormat.Svg);
         var correctionLevel = TryParseEnum<QrCorrectionLevel>(CorrectionLevelStr, QrCorrectionLevel.Q);
+        // --- RESTRICCIÓN de forma de ojo según marco ---
+        eyeCenterShape = EnforceEyeCenterShapeRestriction(eyeFrameShape, eyeCenterShape);
 
         var qr = new QrCodeBuilder()
             .WithContent(Content ?? "https://midominio.com")
@@ -52,12 +49,40 @@
         SvgContent = qr.AsSvg();
     }
 
-    // Método genérico para enums con fallback a default si hay error
+    // Método genérico para enums con fallback
     private static TEnum TryParseEnum<TEnum>(string value, TEnum defaultValue) where TEnum : struct
     {
         if (!string.IsNullOrEmpty(value) && Enum.TryParse(value, true, out TEnum result))
             return result;
         return defaultValue;
+    }
+
+    // Forza Circle si el marco es Leaf o Diamond
+    private static EyeCenterShape EnforceEyeCenterShapeRestriction(EyeFrameShape marco, EyeCenterShape centro)
+    {
+        if (marco == EyeFrameShape.Leaf)
+        {
+            if (centro == EyeCenterShape.Circle)
+            {
+                return EyeCenterShape.Circle;
+            }
+            else
+            {
+                return EyeCenterShape.Leaf;
+            }
+        }
+        else if (marco == EyeFrameShape.Diamond)
+        {
+            if (centro == EyeCenterShape.Circle)
+            {
+                return EyeCenterShape.Circle;
+            }
+            else
+            {
+                return EyeCenterShape.Diamond;
+            }
+        }
+        return centro;
     }
 }
 
