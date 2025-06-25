@@ -21,7 +21,6 @@ namespace CustomizableQrCode.QrCodeRenderer
             int size
         )
         {
-            // Ajusta este valor si tu generador QR agrega quiet zone
             int quietZone = 4;
             int modules = matrix.GetLength(0);
             double moduleSize = (double)size / modules;
@@ -29,12 +28,11 @@ namespace CustomizableQrCode.QrCodeRenderer
             double innerSize = eyeSize - 2 * moduleSize;
             double centerSize = eyeSize - 4 * moduleSize;
 
-            // Ojos en posiciones de QR estándar, considerando quiet zone
             var eyePositions = new (int x, int y)[]
             {
-                (quietZone, quietZone),                                  // Top-left
-                (modules - 7 - quietZone, quietZone),                    // Top-right
-                (quietZone, modules - 7 - quietZone)                     // Bottom-left
+                (quietZone, quietZone),
+                (modules - 7 - quietZone, quietZone),
+                (quietZone, modules - 7 - quietZone)
             };
 
             var sb = new StringBuilder();
@@ -73,12 +71,12 @@ namespace CustomizableQrCode.QrCodeRenderer
                 return false;
             }
 
-            // Render módulos QR (SIN superponer los ojos)
+            // Render módulos QR (sin superponer los ojos)
             for (int x = 0; x < modules; x++)
             {
                 for (int y = 0; y < modules; y++)
                 {
-                    if (IsInEyeArea(x, y)) continue; // Omitir áreas de los ojos
+                    if (IsInEyeArea(x, y)) continue;
                     if (!matrix[x, y]) continue;
                     double px = x * moduleSize;
                     double py = y * moduleSize;
@@ -95,7 +93,6 @@ namespace CustomizableQrCode.QrCodeRenderer
                             var hex = GetHexagonPoints(px, py, moduleSize);
                             sb.AppendLine($"<polygon points='{hex}' fill='{moduleColor}'/>");
                             break;
-                            // Más formas...
                     }
                 }
             }
@@ -108,7 +105,6 @@ namespace CustomizableQrCode.QrCodeRenderer
                 double centerCx = ox + eyeSize / 2;
                 double centerCy = oy + eyeSize / 2;
 
-                // Marco exterior del ojo
                 switch (eyeFrameShape)
                 {
                     case EyeFrameShape.Square:
@@ -135,13 +131,46 @@ namespace CustomizableQrCode.QrCodeRenderer
                         sb.AppendLine($"<circle cx='{centerCx}' cy='{centerCy}' r='{eyeSize / 2}' fill='{eyeFrameColor}'/>");
                         sb.AppendLine($"<circle cx='{centerCx}' cy='{centerCy}' r='{innerSize / 2}' fill='#fff'/>");
                         break;
+                    // --- Nuevos estilos de marco (pro) ---
+                    case EyeFrameShape.Dotted:
+                        sb.AppendLine(DrawDottedEye(ox, oy, eyeSize, eyeFrameColor, moduleSize));
+                        sb.AppendLine($"<rect x='{ox + moduleSize}' y='{oy + moduleSize}' width='{innerSize}' height='{innerSize}' fill='#fff'/>");
+                        break;
+                    case EyeFrameShape.Double:
+                        sb.AppendLine(DrawDoubleEye(ox, oy, eyeSize, eyeFrameColor, moduleSize));
+                        sb.AppendLine($"<rect x='{ox + moduleSize * 2}' y='{oy + moduleSize * 2}' width='{eyeSize - 4 * moduleSize}' height='{eyeSize - 4 * moduleSize}' fill='#fff'/>");
+                        break;
+                    case EyeFrameShape.CircleInSquare:
+                        sb.AppendLine($"<rect x='{ox}' y='{oy}' width='{eyeSize}' height='{eyeSize}' rx='{moduleSize * 1.5}' fill='{eyeFrameColor}'/>");
+                        sb.AppendLine($"<circle cx='{centerCx}' cy='{centerCy}' r='{innerSize / 2}' fill='#fff'/>");
+                        break;
+                    case EyeFrameShape.IrregularLeft:
+                        sb.AppendLine(DrawIrregularEye(ox, oy, eyeSize, eyeFrameColor, "left"));
+                        sb.AppendLine($"<rect x='{ox + moduleSize}' y='{oy + moduleSize}' width='{innerSize}' height='{innerSize}' fill='#fff'/>");
+                        break;
+                    case EyeFrameShape.IrregularRight:
+                        sb.AppendLine(DrawIrregularEye(ox, oy, eyeSize, eyeFrameColor, "right"));
+                        sb.AppendLine($"<rect x='{ox + moduleSize}' y='{oy + moduleSize}' width='{innerSize}' height='{innerSize}' fill='#fff'/>");
+                        break;
+                    case EyeFrameShape.IrregularTop:
+                        sb.AppendLine(DrawIrregularEye(ox, oy, eyeSize, eyeFrameColor, "top"));
+                        sb.AppendLine($"<rect x='{ox + moduleSize}' y='{oy + moduleSize}' width='{innerSize}' height='{innerSize}' fill='#fff'/>");
+                        break;
+                    case EyeFrameShape.IrregularBottom:
+                        sb.AppendLine(DrawIrregularEye(ox, oy, eyeSize, eyeFrameColor, "bottom"));
+                        sb.AppendLine($"<rect x='{ox + moduleSize}' y='{oy + moduleSize}' width='{innerSize}' height='{innerSize}' fill='#fff'/>");
+                        break;
+                    case EyeFrameShape.Wavy:
+                        sb.AppendLine(DrawWavyEye(ox, oy, eyeSize, eyeFrameColor));
+                        sb.AppendLine($"<rect x='{ox + moduleSize}' y='{oy + moduleSize}' width='{innerSize}' height='{innerSize}' fill='#fff'/>");
+                        break;
                     default:
                         sb.AppendLine($"<rect x='{ox}' y='{oy}' width='{eyeSize}' height='{eyeSize}' fill='{eyeFrameColor}'/>");
                         sb.AppendLine($"<rect x='{ox + moduleSize}' y='{oy + moduleSize}' width='{innerSize}' height='{innerSize}' fill='#fff'/>");
                         break;
                 }
 
-                // Pupila/centro del ojo
+                // Pupila/centro del ojo (igual que antes)
                 EyeCenterShape allowedShape = eyeCenterShape;
                 if (eyeFrameShape == EyeFrameShape.Leaf && eyeCenterShape != EyeCenterShape.Circle && eyeCenterShape != EyeCenterShape.Leaf)
                     allowedShape = EyeCenterShape.Leaf;
@@ -213,5 +242,111 @@ namespace CustomizableQrCode.QrCodeRenderer
             var r = size / 2;
             return $"<path d='M{cx} {cy - r} Q {cx + r} {cy} {cx} {cy + r} Q {cx - r} {cy} {cx} {cy - r} Z' fill='{color}'/>";
         }
+
+        private static string DrawDottedEye(double x, double y, double size, string color, double moduleSize)
+        {
+            // Círculos en los bordes, efecto punteado
+            int dots = 14;
+            double r = moduleSize * 0.38;
+            var sb = new StringBuilder();
+            // Superior
+            for (int i = 0; i < dots; i++)
+            {
+                double px = x + (i / (double)(dots - 1)) * size;
+                sb.AppendLine($"<circle cx='{px}' cy='{y}' r='{r}' fill='{color}'/>");
+            }
+            // Inferior
+            for (int i = 0; i < dots; i++)
+            {
+                double px = x + (i / (double)(dots - 1)) * size;
+                sb.AppendLine($"<circle cx='{px}' cy='{y + size}' r='{r}' fill='{color}'/>");
+            }
+            // Izquierda
+            for (int i = 1; i < dots - 1; i++)
+            {
+                double py = y + (i / (double)(dots - 1)) * size;
+                sb.AppendLine($"<circle cx='{x}' cy='{py}' r='{r}' fill='{color}'/>");
+            }
+            // Derecha
+            for (int i = 1; i < dots - 1; i++)
+            {
+                double py = y + (i / (double)(dots - 1)) * size;
+                sb.AppendLine($"<circle cx='{x + size}' cy='{py}' r='{r}' fill='{color}'/>");
+            }
+            return sb.ToString();
+        }
+
+        private static string DrawDoubleEye(double x, double y, double size, string color, double moduleSize)
+        {
+            // Doble línea cuadrada: borde externo e interno
+            double margin = moduleSize * 0.9;
+            var sb = new StringBuilder();
+            sb.AppendLine($"<rect x='{x}' y='{y}' width='{size}' height='{size}' fill='none' stroke='{color}' stroke-width='{margin}'/>");
+            sb.AppendLine($"<rect x='{x + margin * 1.4}' y='{y + margin * 1.4}' width='{size - margin * 2.8}' height='{size - margin * 2.8}' fill='none' stroke='{color}' stroke-width='{margin / 1.7}'/>");
+            return sb.ToString();
+        }
+
+        private static string DrawIrregularEye(double x, double y, double size, string color, string side)
+        {
+            // Cambia los controles para hacer cada lado "irregular"
+            double r = size * 0.16;
+            string path = "";
+            switch (side)
+            {
+                case "left":
+                    path = $"M{x + r},{y} Q{x - r},{y + size / 2} {x + r},{y + size} " +
+                           $"L{x + size - r},{y + size} Q{x + size},{y + size / 2} {x + size - r},{y} Z";
+                    break;
+                case "right":
+                    path = $"M{x + r},{y} Q{x + size},{y + size / 2} {x + r},{y + size} " +
+                           $"L{x + size - r},{y + size} Q{x - r},{y + size / 2} {x + size - r},{y} Z";
+                    break;
+                case "top":
+                    path = $"M{x},{y + r} Q{x + size / 2},{y - r} {x + size},{y + r} " +
+                           $"L{x + size},{y + size - r} Q{x + size / 2},{y + size} {x},{y + size - r} Z";
+                    break;
+                case "bottom":
+                    path = $"M{x},{y + r} Q{x + size / 2},{y + size} {x + size},{y + r} " +
+                           $"L{x + size},{y + size - r} Q{x + size / 2},{y - r} {x},{y + size - r} Z";
+                    break;
+            }
+            return $"<path d='{path}' fill='{color}'/>";
+        }
+
+        private static string DrawWavyEye(double x, double y, double size, string color)
+        {
+            // Un marco con ondas senoidales en los 4 lados
+            int waves = 4;
+            double amplitude = size * 0.07;
+            var sb = new StringBuilder();
+            sb.Append($"<path d='M{x},{y + amplitude}");
+            // Top
+            for (int i = 1; i <= waves; i++)
+            {
+                double t = (double)i / waves;
+                sb.Append($" Q{x + size * (t - 0.25 / waves)},{y - amplitude} {x + size * t},{y + amplitude}");
+            }
+            // Right
+            for (int i = 1; i <= waves; i++)
+            {
+                double t = (double)i / waves;
+                sb.Append($" Q{x + size + amplitude},{y + size * (t - 0.25 / waves)} {x + size - amplitude},{y + size * t}");
+            }
+            // Bottom
+            for (int i = 1; i <= waves; i++)
+            {
+                double t = (double)i / waves;
+                sb.Append($" Q{x + size * (1 - t + 0.25 / waves)},{y + size + amplitude} {x + size * (1 - t)},{y + size - amplitude}");
+            }
+            // Left
+            for (int i = 1; i <= waves; i++)
+            {
+                double t = (double)i / waves;
+                sb.Append($" Q{x - amplitude},{y + size * (1 - t + 0.25 / waves)} {x + amplitude},{y + size * (1 - t)}");
+            }
+            sb.Append(" Z' fill='" + color + "'/>");
+            return sb.ToString();
+        }
+
     }
 }
