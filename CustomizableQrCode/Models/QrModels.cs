@@ -13,8 +13,10 @@ namespace CustomizableQrCode.Models
         public enum EyeShape { Square, Circle, Diamond }
         public enum QrExportFormat { Svg, Png, Jpg }
         public enum QrCorrectionLevel { L, M, Q, H }
-        public enum EyeFrameShape { Square, Rounded, Circle, Leaf, Point, Diamond, Double, IrregularLeft, IrregularRight, IrregularTop, IrregularBottom, Wavy, Dotted, CircleInSquare }
-        public enum EyeCenterShape { Square, Circle, Diamond, Rounded, Point, Leaf }
+        public enum EyeFrameShape { Square, Rounded, Circle, Leaf, Point, Diamond, Double, IrregularLeft, IrregularRight, IrregularTop, IrregularBottom, Wavy, Dotted, 
+            CircleInSquare, Pixelated, RoundedAll, RoundedTopRight, Blob, BlobTopRight, Skewed, CornerRect
+        }
+        public enum EyeCenterShape { Square, Circle, Diamond, Rounded, Point, Leaf , CornerRect }
 
     }
 
