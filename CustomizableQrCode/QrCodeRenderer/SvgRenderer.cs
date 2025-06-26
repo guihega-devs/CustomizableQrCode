@@ -294,6 +294,46 @@ namespace CustomizableQrCode.QrCodeRenderer
                         string pupilCRO = DrawBottomLeftSquareRCOEyePupil(ox, oy, eyeSize, eyeCenterColor);
                         sb.AppendLine(WithRotation(pupilCRO, centerCx, centerCy, angle));
                         break;
+                    case EyeCenterShape.Plus:
+                        sb.AppendLine(DrawPlusShape(centerCx, centerCy, centerSize, eyeCenterColor));
+                        break;
+                    case EyeCenterShape.Star:
+                        sb.AppendLine(DrawStarShapeRounded(centerCx, centerCy, centerSize, eyeCenterColor));
+                        break;
+                    case EyeCenterShape.Starburst:
+                        // Si eyeCenterShape == EyeCenterShape.StarburstCircle
+                        sb.AppendLine(DrawStarburstEyeWithCircle(centerCx, centerCy, centerSize, eyeCenterColor, eyeCenterColor,15, 0.75));
+                        break;
+                    case EyeCenterShape.ConcaveSquircle:
+                        sb.AppendLine(DrawConcaveSquircleEye(centerCx, centerCy, centerSize, eyeCenterColor));
+                        break;
+                    case EyeCenterShape.DiagonalCut:
+                        string diagonalCut = DrawDiagonalCutEye(centerCx, centerCy, centerSize, eyeCenterColor);
+                        sb.AppendLine(WithRotation(diagonalCut, centerCx, centerCy, angle));
+                        break;
+                    case EyeCenterShape.TripleBar:
+                        sb.AppendLine(DrawTripleBarEye(centerCx, centerCy, centerSize, eyeCenterColor));
+                        break;
+                    case EyeCenterShape.TripleBarV:
+                        sb.AppendLine(DrawTripleBarVerticalEye(centerCx, centerCy, centerSize, eyeCenterColor));
+                        break;
+                    case EyeCenterShape.BubbleGrid:
+                        sb.AppendLine(DrawBubbleGridEye(centerCx, centerCy, centerSize, eyeCenterColor));
+                        break;
+                    case EyeCenterShape.BubbleOver:
+                        sb.AppendLine(DrawBubbleOverEye(centerCx - centerSize / 2, centerCy - centerSize / 2, centerSize, eyeCenterColor));
+                        break;
+
+                    case EyeCenterShape.BlockGrid:
+                        sb.AppendLine(DrawBlockGridEye(centerCx - centerSize / 2, centerCy - centerSize / 2, centerSize, eyeCenterColor));
+                        break;
+                    case EyeCenterShape.IrregularSquare:
+                        sb.AppendLine(DrawIrregularSquareEye(centerCx - centerSize / 2, centerCy - centerSize / 2, centerSize, eyeCenterColor));
+                        break;
+                    case EyeCenterShape.WavySquare:
+                        sb.AppendLine(DrawWavySquareEye(centerCx - centerSize / 2, centerCy - centerSize / 2, centerSize, eyeCenterColor));
+                        break;
+
                 }
             }
 
@@ -753,5 +793,429 @@ namespace CustomizableQrCode.QrCodeRenderer
             double pupilSize = size - 2 * padding;
             return DrawTwoCornerRectInEye(x + padding, y + padding, pupilSize, color);
         }
+
+        /// <summary>
+        /// Genera una figura SVG de cruz tipo “plus”
+        /// centrada en (cx, cy) y de tamaño size x size.
+        /// </summary>
+        /// <param name="cx">Centro X</param>
+        /// <param name="cy">Centro Y</param>
+        /// <param name="size">Tamaño total de la figura (lado del cuadrado contenedor)</param>
+        /// <param name="color">Color de relleno</param>
+        /// <returns>SVG de la cruz</returns>
+        private static string DrawPlusShape(double cx, double cy, double size, string color)
+        {
+            // La cruz es un cuadrado central con dos rectángulos cruzados
+            // Tamaño del brazo como proporción (ajustable)
+            double arm = size * 0.3; // ancho del brazo
+            double half = size / 2;
+
+            // Coordenadas de la cruz
+            double x = cx - half;
+            double y = cy - half;
+
+            // Path SVG para una cruz
+            //      ---
+            //    |     |
+            //   ---   ---
+            //    |     |
+            //      ---
+            var sb = new StringBuilder();
+            sb.Append($"<rect x='{x + arm}' y='{y}' width='{size - 2 * arm}' height='{size}' fill='{color}'/>"); // Vertical
+            sb.Append($"<rect x='{x}' y='{y + arm}' width='{size}' height='{size - 2 * arm}' fill='{color}'/>"); // Horizontal
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Genera una estrella de cinco puntas centrada en (cx, cy) y de tamaño size x size.
+        /// </summary>
+        /// <param name="cx">Centro X</param>
+        /// <param name="cy">Centro Y</param>
+        /// <param name="size">Tamaño de la figura</param>
+        /// <param name="color">Color de relleno</param>
+        /// <returns>SVG de la estrella</returns>
+        private static string DrawStarShapeRounded(double cx, double cy, double size, string color)
+        {
+            int points = 5;
+            double outerRadius = size / 2;
+            double innerRadius = outerRadius * 0.5;
+            double angle = -Math.PI / 2;
+            var sb = new StringBuilder();
+            sb.Append($"<polygon fill='{color}' stroke='{color}' stroke-width='{size * 0.13}' stroke-linejoin='round' points='");
+
+            for (int i = 0; i < points * 2; i++)
+            {
+                double r = (i % 2 == 0) ? outerRadius : innerRadius;
+                double a = angle + i * Math.PI / points;
+                double x = cx + r * Math.Cos(a);
+                double y = cy + r * Math.Sin(a);
+                sb.Append($"{x},{y} ");
+            }
+
+            sb.Append("'/>");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Dibuja una forma de estrella de picos (starburst) con un círculo central más grande.
+        /// </summary>
+        /// <param name="cx">Centro X.</param>
+        /// <param name="cy">Centro Y.</param>
+        /// <param name="size">Tamaño total (ancho/alto).</param>
+        /// <param name="color">Color de la estrella.</param>
+        /// <param name="circleColor">Color del círculo central.</param>
+        /// <param name="spikes">Cantidad de picos (default 20).</param>
+        /// <param name="circleRatio">Proporción del círculo respecto al tamaño (default 0.58).</param>
+        /// <returns>SVG string.</returns>
+        private static string DrawStarburstEyeWithCircle(double cx, double cy, double size, string color, string circleColor, int spikes = 20, double circleRatio = 0.58)
+        {
+            double outerRadius = size / 2;
+            double innerRadius = outerRadius * 0.65;
+            double angle = -Math.PI / 2;
+
+            var sb = new StringBuilder();
+            sb.Append($"<polygon fill='{color}' points='");
+            for (int i = 0; i < spikes * 2; i++)
+            {
+                double r = (i % 2 == 0) ? outerRadius : innerRadius;
+                double a = angle + i * Math.PI / spikes;
+                double x = cx + r * Math.Cos(a);
+                double y = cy + r * Math.Sin(a);
+                sb.Append($"{x},{y} ");
+            }
+            sb.Append("'/>");
+
+            // Agrega círculo central (encima, más grande que el "default")
+            double circleRadius = outerRadius * circleRatio;
+            sb.Append($"<circle cx='{cx}' cy='{cy}' r='{circleRadius}' fill='{circleColor}'/>");
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Dibuja una forma cuadrada con lados cóncavos (concave squircle/inward square) para el ojo del QR.
+        /// </summary>
+        /// <param name="cx">Coordenada X del centro de la figura.</param>
+        /// <param name="cy">Coordenada Y del centro de la figura.</param>
+        /// <param name="size">Tamaño total de la figura (ancho/alto).</param>
+        /// <param name="color">Color de relleno.</param>
+        /// <param name="depth">Profundidad de la concavidad (0 a 0.5, valor sugerido: 0.2).</param>
+        /// <returns>SVG path string.</returns>
+        private static string DrawConcaveSquircleEye(double cx, double cy, double size, string color, double depth = -0.10)
+        {
+            // Definimos los 4 vértices y los puntos medios para el control de curvas cóncavas
+            double half = size / 2;
+            double left = cx - half;
+            double right = cx + half;
+            double top = cy - half;
+            double bottom = cy + half;
+            double offset = size * depth;
+
+            var sb = new StringBuilder();
+            sb.Append($"<path d='");
+            sb.Append($"M {left},{top + offset} ");
+            sb.Append($"Q {cx},{top - offset} {right},{top + offset} ");
+            sb.Append($"Q {right + offset},{cy} {right},{bottom - offset} ");
+            sb.Append($"Q {cx},{bottom + offset} {left},{bottom - offset} ");
+            sb.Append($"Q {left - offset},{cy} {left},{top + offset} ");
+            sb.Append("' fill='" + color + "'/>");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Dibuja una figura cuadrada con dos esquinas opuestas recortadas en diagonal para el centro del ojo QR.
+        /// </summary>
+        /// <param name="cx">Coordenada X del centro.</param>
+        /// <param name="cy">Coordenada Y del centro.</param>
+        /// <param name="size">Tamaño del cuadrado base.</param>
+        /// <param name="color">Color de relleno.</param>
+        /// <param name="cut">Proporción del corte diagonal respecto al lado (por defecto 0.28).</param>
+        /// <returns>SVG path string.</returns>
+        private static string DrawDiagonalCutEye(double cx, double cy, double size, string color, double cut = 0.40)
+        {
+            double half = size / 2;
+            double left = cx - half;
+            double right = cx + half;
+            double top = cy - half;
+            double bottom = cy + half;
+            double d = size * cut;
+
+            var sb = new StringBuilder();
+            sb.Append($"<path d='");
+            sb.Append($"M {left},{top + d} ");            // Arriba izquierda después del corte
+            sb.Append($"L {left + d},{top} ");            // Arriba después del corte
+            sb.Append($"L {right},{top} ");               // Arriba derecha
+            sb.Append($"L {right},{bottom - d} ");        // Derecha abajo antes del corte
+            sb.Append($"L {right - d},{bottom} ");        // Abajo después del corte
+            sb.Append($"L {left},{bottom} ");             // Abajo izquierda
+            sb.Append("Z' ");
+            sb.Append($"fill='{color}'/>");
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Dibuja tres barras horizontales redondeadas como centro de ojo QR.
+        /// </summary>
+        /// <param name="cx">Coordenada X del centro del ojo.</param>
+        /// <param name="cy">Coordenada Y del centro del ojo.</param>
+        /// <param name="size">Tamaño total del área.</param>
+        /// <param name="color">Color de las barras.</param>
+        /// <returns>SVG group con tres rectángulos redondeados.</returns>
+        private static string DrawTripleBarEye(double cx, double cy, double size, string color)
+        {
+            double barWidth = size * 1;
+            double barHeight = size * 0.35;
+            double spacing = size * 0.04;
+
+            double left = cx - barWidth / 2;
+            double top = cy - (barHeight * 1.5 + spacing);
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < 3; i++)
+            {
+                double y = top + i * (barHeight + spacing);
+                sb.Append($"<rect x='{left}' y='{y}' width='{barWidth}' height='{barHeight}' rx='{barHeight / 2}' fill='{color}'/>");
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Dibuja tres barras verticales redondeadas como centro de ojo QR.
+        /// </summary>
+        /// <param name="cx">Coordenada X del centro del ojo.</param>
+        /// <param name="cy">Coordenada Y del centro del ojo.</param>
+        /// <param name="size">Tamaño total del área.</param>
+        /// <param name="color">Color de las barras.</param>
+        /// <returns>SVG group con tres rectángulos verticales redondeados.</returns>
+        private static string DrawTripleBarVerticalEye(double cx, double cy, double size, string color)
+        {
+            double barHeight = size * 1;
+            double barWidth = size * 0.25;
+            double spacing = size * 0.04;
+
+            double top = cy - barHeight / 2;
+            double left = cx - (barWidth * 1.5 + spacing);
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < 3; i++)
+            {
+                double x = left + i * (barWidth + spacing);
+                sb.Append($"<rect x='{x}' y='{top}' width='{barWidth}' height='{barHeight}' rx='{barWidth / 2}' fill='{color}'/>");
+            }
+            return sb.ToString();
+        }
+
+
+        /// <summary>
+        /// Dibuja un ojo de 3x3 círculos ("Bubble Grid") en el centro (como la imagen proporcionada).
+        /// </summary>
+        /// <param name="cx">Coordenada X del centro.</param>
+        /// <param name="cy">Coordenada Y del centro.</param>
+        /// <param name="size">Tamaño total del área.</param>
+        /// <param name="color">Color de los círculos.</param>
+        /// <returns>SVG de una cuadrícula 3x3 de círculos.</returns>
+        private static string DrawBubbleGridEye(double cx, double cy, double size, string color)
+        {
+            double gridSize = size * 0.85;   // Ajusta el tamaño total del grid dentro del centro
+            double r = gridSize / 6;         // Radio de cada círculo
+            double step = gridSize / 3;      // Distancia entre centros de los círculos
+
+            // Coordenada inicio para centrar la cuadrícula 3x3
+            double startX = cx - gridSize / 2;
+            double startY = cy - gridSize / 2;
+
+            var sb = new StringBuilder();
+
+            // 3x3 círculos
+            for (int row = 0; row < 3; row++)
+            {
+                for (int col = 0; col < 3; col++)
+                {
+                    double x = startX + col * step + step / 2;
+                    double y = startY + row * step + step / 2;
+                    sb.Append($"<circle cx='{x}' cy='{y}' r='{r}' fill='{color}'/>");
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Dibuja un centro de ojo en forma de cuadrícula de 3x3 burbujas/círculos grandes superpuestos, cubriendo todo el área y sin dejar huecos internos.
+        /// </summary>
+        /// <param name="x">Coordenada X inicial.</param>
+        /// <param name="y">Coordenada Y inicial.</param>
+        /// <param name="size">Tamaño del área cuadrada que ocupará el centro del ojo.</param>
+        /// <param name="color">Color de los círculos.</param>
+        /// <returns>SVG con la cuadrícula de burbujas superpuestas.</returns>
+        private static string DrawBubbleOverEye(double x, double y, double size, string color)
+        {
+            var sb = new StringBuilder();
+            int grid = 3;
+            // Queremos que el círculo del centro esté exactamente al centro, y los demás alrededor
+            double gap = size * 0.15; // Ajusta el gap para más o menos superposición (más pequeño = más juntos)
+            double bubbleSize = (size + gap * (grid - 1)) / grid;
+            double realGridSize = bubbleSize * grid - gap * (grid - 1);
+            double offset = (size - realGridSize) / 2;
+
+            for (int row = 0; row < grid; row++)
+            {
+                for (int col = 0; col < grid; col++)
+                {
+                    double cx = x + offset + col * (bubbleSize - gap) + bubbleSize / 2;
+                    double cy = y + offset + row * (bubbleSize - gap) + bubbleSize / 2;
+                    sb.AppendLine($"<circle cx='{cx}' cy='{cy}' r='{bubbleSize / 2}' fill='{color}'/>");
+                }
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Dibuja un centro de ojo tipo "BlockGrid": una cuadrícula 3x3 de cuadrados, cada uno con una ligera rotación aleatoria para un efecto dinámico.
+        /// </summary>
+        private static string DrawBlockGridEye(double x, double y, double size, string color)
+        {
+            var sb = new StringBuilder();
+            int grid = 3;
+            // Tamaño del cuadrado menor para permitir giro sin salir del área
+            double blockSize = size / (grid + 0.2);
+            // Centrado de la cuadrícula dentro del área disponible
+            double gridSize = blockSize * grid;
+            double offset = (size - gridSize) / 2;
+
+            Random rand = new Random(31); // Semilla fija para que no cambie cada render
+
+            for (int row = 0; row < grid; row++)
+            {
+                for (int col = 0; col < grid; col++)
+                {
+                    double cx = x + offset + col * blockSize + blockSize / 2;
+                    double cy = y + offset + row * blockSize + blockSize / 2;
+                    // Rango de rotación: -15° a +15°
+                    double angle = (rand.NextDouble() - 0.5) * 30;
+                    sb.AppendLine($"<g transform='rotate({angle},{cx},{cy})'><rect x='{cx - blockSize / 2}' y='{cy - blockSize / 2}' width='{blockSize}' height='{blockSize}' fill='{color}'/></g>");
+                }
+            }
+            return sb.ToString();
+        }
+
+
+        /// <summary>
+        /// Dibuja un centro de ojo tipo "IrregularSquare": un cuadrado cuyos bordes están perturbados aleatoriamente para dar apariencia de trazo manual.
+        /// </summary>
+        private static string DrawIrregularSquareEye(double x, double y, double size, string color)
+        {
+            var sb = new StringBuilder();
+            int segmentsPerSide = 14; // Entre más segmentos, más detalle
+            double step = size / segmentsPerSide;
+            double amplitude = size * 0.06; // Qué tanto "vibra" el borde
+
+            Random rand = new Random(43); // Semilla fija para render reproducible
+
+            sb.Append($"<path d='");
+
+            // Lado superior: izq -> der
+            for (int i = 0; i <= segmentsPerSide; i++)
+            {
+                double px = x + i * step;
+                double py = y + Math.Sin(i * 0.7) * rand.NextDouble() * amplitude;
+                if (i == 0)
+                    sb.Append($"M{px},{py} ");
+                else
+                    sb.Append($"L{px},{py} ");
+            }
+
+            // Lado derecho: arr -> abajo
+            for (int i = 1; i <= segmentsPerSide; i++)
+            {
+                double px = x + size + Math.Sin(i * 0.5) * rand.NextDouble() * amplitude;
+                double py = y + i * step;
+                sb.Append($"L{px},{py} ");
+            }
+
+            // Lado inferior: der -> izq
+            for (int i = 1; i <= segmentsPerSide; i++)
+            {
+                double px = x + size - i * step;
+                double py = y + size + Math.Sin(i * 0.6) * rand.NextDouble() * amplitude;
+                sb.Append($"L{px},{py} ");
+            }
+
+            // Lado izquierdo: abajo -> arriba
+            for (int i = 1; i < segmentsPerSide; i++)
+            {
+                double px = x + Math.Sin(i * 0.7) * rand.NextDouble() * amplitude;
+                double py = y + size - i * step;
+                sb.Append($"L{px},{py} ");
+            }
+
+            sb.Append("Z' ");
+            sb.Append($"fill='{color}'/>");
+            return sb.ToString();
+        }
+
+
+        /// <summary>
+        /// Dibuja un centro de ojo cuadrado con bordes ondulados ("WavySquare") usando ondas senoidales.
+        /// </summary>
+        private static string DrawWavySquareEye(double x, double y, double size, string color)
+        {
+            int teethPerSide = 8; // Ajusta para más o menos dientes
+            double step = size / teethPerSide;
+            double amplitude = size * 0.03; // Ajusta la altura de los dientes
+            var sb = new StringBuilder();
+
+            // Comienza en esquina superior izquierda, hacia afuera
+            sb.Append($"<path d='");
+
+            // Top side
+            for (int i = 0; i < teethPerSide; i++)
+            {
+                double px1 = x + i * step;
+                double py1 = y;
+                double px2 = px1 + step / 2;
+                double py2 = (i % 2 == 0) ? y - amplitude : y + amplitude;
+                double px3 = x + (i + 1) * step;
+                double py3 = y;
+                if (i == 0) sb.Append($"M{px1},{py1} ");
+                sb.Append($"L{px2},{py2} L{px3},{py3} ");
+            }
+            // Right side
+            for (int i = 0; i < teethPerSide; i++)
+            {
+                double px1 = x + size;
+                double py1 = y + i * step;
+                double px2 = px1 + ((i % 2 == 0) ? amplitude : -amplitude);
+                double py2 = py1 + step / 2;
+                double px3 = x + size;
+                double py3 = y + (i + 1) * step;
+                sb.Append($"L{px2},{py2} L{px3},{py3} ");
+            }
+            // Bottom side
+            for (int i = 0; i < teethPerSide; i++)
+            {
+                double px1 = x + size - i * step;
+                double py1 = y + size;
+                double px2 = px1 - step / 2;
+                double py2 = (i % 2 == 0) ? y + size + amplitude : y + size - amplitude;
+                double px3 = x + size - (i + 1) * step;
+                double py3 = y + size;
+                sb.Append($"L{px2},{py2} L{px3},{py3} ");
+            }
+            // Left side
+            for (int i = 0; i < teethPerSide; i++)
+            {
+                double px1 = x;
+                double py1 = y + size - i * step;
+                double px2 = px1 - ((i % 2 == 0) ? amplitude : -amplitude);
+                double py2 = py1 - step / 2;
+                double px3 = x;
+                double py3 = y + size - (i + 1) * step;
+                sb.Append($"L{px2},{py2} L{px3},{py3} ");
+            }
+            sb.Append("Z' fill='" + color + "'/>");
+            return sb.ToString();
+        }
+
     }
 }

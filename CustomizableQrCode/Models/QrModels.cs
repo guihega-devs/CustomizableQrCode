@@ -16,7 +16,9 @@ namespace CustomizableQrCode.Models
         public enum EyeFrameShape { Square, Rounded, Circle, Leaf, Point, Diamond, Double, IrregularLeft, IrregularRight, IrregularTop, IrregularBottom, Wavy, Dotted, 
             CircleInSquare, Pixelated, RoundedAll, CornerRect, TwoCornerRect, CornerRectRadio, TwoCornerRectIn, CornerRoundOut, CornerRoundOutSP
         }
-        public enum EyeCenterShape { Square, Circle, Diamond, Rounded, Point, Leaf , CornerRect, TwoCornerRect, CornerRectRadio, TwoCornerRectIn, CornerRoundOut }
+        public enum EyeCenterShape { Square, Circle, Diamond, Rounded, Point, Leaf , CornerRect, TwoCornerRect, CornerRectRadio, TwoCornerRectIn, CornerRoundOut, 
+            Plus, Star, Starburst, ConcaveSquircle, DiagonalCut, TripleBar, TripleBarV, BubbleGrid, BubbleOver, BlockGrid, IrregularSquare, WavySquare
+        }
 
     }
 
