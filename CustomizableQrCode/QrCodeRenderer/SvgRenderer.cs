@@ -112,6 +112,8 @@ namespace CustomizableQrCode.QrCodeRenderer
                 double centerCx = ox + eyeSize / 2;
                 double centerCy = oy + eyeSize / 2;
 
+                //int[] angles = { 0, 90, 270 }; // Ojo 0,1,2
+
                 double angle = 0;
                 switch (eyeIndex)
                 {
@@ -184,17 +186,47 @@ namespace CustomizableQrCode.QrCodeRenderer
                         sb.AppendLine($"<rect x='{ox + moduleSize}' y='{oy + moduleSize}' width='{innerSize}' height='{innerSize}' fill='#fff'/>");
                         break;
                     //Nuevas pruebas
-                    case EyeFrameShape.CornerRect:
-                        //sb.AppendLine(DrawBottomLeftSquareEye(ox, oy, eyeSize, eyeFrameColor)); // Marco
-                        //sb.AppendLine(DrawBottomLeftSquareEyeCenter(ox, oy, eyeSize, "#fff"));  // Centro blanco
 
+                    //Una esquina recta
+                    case EyeFrameShape.CornerRect:
                         string marco = DrawBottomLeftSquareEye(ox, oy, eyeSize, eyeFrameColor);
                         sb.AppendLine(WithRotation(marco, centerCx, centerCy, angle));
                         // CENTRO blanco
                         string centro = DrawBottomLeftSquareEyeCenter(ox, oy, eyeSize, "#fff");
                         sb.AppendLine(WithRotation(centro, centerCx, centerCy, angle));
-
-                        //continue;
+                        break;
+                    //Dos esquinas rectas
+                    case EyeFrameShape.TwoCornerRect:
+                        //sb.AppendLine(WithRotation(DrawTopRightRoundedEye(ox, oy, eyeSize, eyeFrameColor), centerCx, centerCy, angle)); // Marco
+                        //sb.AppendLine(WithRotation(DrawTopRightRoundedEyeCenter(ox, oy, eyeSize, "#fff"), centerCx, centerCy, angle));  // Centro blanco
+                        // Rota según la posición del ojo: 0=top-left, 1=top-right, 2=bottom-left
+                        // Para cada ojo: 0 = sup izq, 1 = sup der, 2 = inf izq
+                        int[] angles = { 90, 180, 0 };
+                        double cx = ox + eyeSize / 2;
+                        double cy = oy + eyeSize / 2;
+                        sb.AppendLine(WithRotation(DrawTwoCornerRectEye(ox, oy, eyeSize, eyeFrameColor), cx, cy, angles[eyeIndex]));
+                        sb.AppendLine(WithRotation(DrawTwoCornerRectEyeCenter(ox, oy, eyeSize, "#fff"), cx, cy, angles[eyeIndex]));
+                        //sb.AppendLine(WithRotation(DrawTwoCornerRectEyePupil(ox, oy, eyeSize, eyeCenterColor), cx, cy, angles[eyeIndex]));
+                        break;
+                    //
+                    case EyeFrameShape.CornerRectRadio:
+                        string marcoradio = DrawBottomLeftSquareRadioEye(ox, oy, eyeSize, eyeFrameColor);
+                        sb.AppendLine(WithRotation(marcoradio, centerCx, centerCy, angle));
+                        // CENTRO blanco
+                        string centroradio = DrawBottomLeftSquareRadioEyeCenter(ox, oy, eyeSize, "#fff");
+                        sb.AppendLine(WithRotation(centroradio, centerCx, centerCy, angle));
+                        break;
+                    case EyeFrameShape.TwoCornerRectIn:
+                        //sb.AppendLine(WithRotation(DrawTopRightRoundedEye(ox, oy, eyeSize, eyeFrameColor), centerCx, centerCy, angle)); // Marco
+                        //sb.AppendLine(WithRotation(DrawTopRightRoundedEyeCenter(ox, oy, eyeSize, "#fff"), centerCx, centerCy, angle));  // Centro blanco
+                        // Rota según la posición del ojo: 0=top-left, 1=top-right, 2=bottom-left
+                        // Para cada ojo: 0 = sup izq, 1 = sup der, 2 = inf izq
+                        int[] anglesIn = { 0, 270, 90 };
+                        double cxIn = ox + eyeSize / 2;
+                        double cyIn = oy + eyeSize / 2;
+                        sb.AppendLine(WithRotation(DrawTwoCornerRectInEye(ox, oy, eyeSize, eyeFrameColor), cxIn, cyIn, anglesIn[eyeIndex]));
+                        sb.AppendLine(WithRotation(DrawTwoCornerRectInEyeCenter(ox, oy, eyeSize, "#fff"), cxIn, cyIn, anglesIn[eyeIndex]));
+                        //sb.AppendLine(WithRotation(DrawTwoCornerRectEyePupil(ox, oy, eyeSize, eyeCenterColor), cx, cy, angles[eyeIndex]));
                         break;
                     default:
                         sb.AppendLine($"<rect x='{ox}' y='{oy}' width='{eyeSize}' height='{eyeSize}' fill='{eyeFrameColor}'/>");
@@ -233,6 +265,29 @@ namespace CustomizableQrCode.QrCodeRenderer
                         //sb.AppendLine(DrawBottomLeftSquareEyePupil(ox, oy, eyeSize, eyeCenterColor)); // Pupila negra
                         string pupil = DrawBottomLeftSquareEyePupil(ox, oy, eyeSize, eyeCenterColor);
                         sb.AppendLine(WithRotation(pupil, centerCx, centerCy, angle));
+                        break;
+                    case EyeCenterShape.TwoCornerRect:
+                        //sb.AppendLine(DrawBottomLeftSquareEyePupil(ox, oy, eyeSize, eyeCenterColor)); // Pupila negra
+                        //string pupil = DrawBottomLeftSquareEyePupil(ox, oy, eyeSize, eyeCenterColor);
+                        int[] angles = { 90, 180, 0 };
+                        double cx = ox + eyeSize / 2;
+                        double cy = oy + eyeSize / 2;
+                        string pupila = DrawTwoCornerRectEyePupil(ox, oy, eyeSize, eyeCenterColor);
+                        sb.AppendLine(WithRotation(pupila, cx, cy, angles[eyeIndex]));
+                        break;
+                    case EyeCenterShape.CornerRectRadio:
+                        //sb.AppendLine(DrawBottomLeftSquareEyePupil(ox, oy, eyeSize, eyeCenterColor)); // Pupila negra
+                        string pupilRadio = DrawBottomLeftSquareRadioEyePupil(ox, oy, eyeSize, eyeCenterColor);
+                        sb.AppendLine(WithRotation(pupilRadio, centerCx, centerCy, angle));
+                        break;
+                    case EyeCenterShape.TwoCornerRectIn:
+                        //sb.AppendLine(DrawBottomLeftSquareEyePupil(ox, oy, eyeSize, eyeCenterColor)); // Pupila negra
+                        //string pupil = DrawBottomLeftSquareEyePupil(ox, oy, eyeSize, eyeCenterColor);
+                        int[] anglesIn = { 0, 270, 90 };
+                        double cxIn = ox + eyeSize / 2;
+                        double cyIn = oy + eyeSize / 2;
+                        string pupilaIn = DrawTwoCornerRectInEyePupil(ox, oy, eyeSize, eyeCenterColor);
+                        sb.AppendLine(WithRotation(pupilaIn, cxIn, cyIn, anglesIn[eyeIndex]));
                         break;
                 }
             }
@@ -425,7 +480,12 @@ namespace CustomizableQrCode.QrCodeRenderer
             return sb.ToString();
         }
 
+        private static string WithRotation(string path, double cx, double cy, double angle)
+        {
+            return $"<g transform='rotate({angle},{cx},{cy})'>{path}</g>";
+        }
 
+        //CornerRecto
         // Dibuja el marco exterior
         private static string DrawBottomLeftSquareEye(double x, double y, double size, string color)
         {
@@ -462,11 +522,173 @@ namespace CustomizableQrCode.QrCodeRenderer
             return DrawBottomLeftSquareEye(x + padding, y + padding, pupilSize, color);
         }
 
-        private static string WithRotation(string path, double cx, double cy, double angle)
+        //DosAngulosRectos
+        // Dibuja un marco con esquinas opuestas redondeadas (sup izq e inf der redondeadas)
+        private static string DrawTwoCornerRectEye(double x, double y, double size, string color, bool outward = true)
         {
-            return $"<g transform='rotate({angle},{cx},{cy})'>{path}</g>";
+            double r = size * 0.28; // radio de la curva
+            var sb = new StringBuilder();
+
+            sb.Append($"<path d='");
+            // Esquina superior izquierda (redondeada)
+            sb.Append($"M{x},{y + r} ");
+            sb.Append($"A{r},{r} 0 0,1 {x + r},{y } ");
+
+            // Lado izquierdo (baja)
+            sb.Append($"L{x},{y + r} ");
+
+            // Esquina inferior izquierda (cuadrada)
+            sb.Append($"L{x},{y + size} ");
+            sb.Append($"L{x + size - r},{y + size} ");
+
+            // Esquina inferior derecha (redondeada)
+            sb.Append($"A{r},{r} 0 0,0 {x + size},{y + size - r} ");
+
+            // Esquina superior derecha (cuadrada)
+            sb.Append($"L{x + size},{y} ");
+            sb.Append($"L{x + r},{y} ");
+            sb.Append("Z' ");
+            sb.Append($"fill='{color}'/>");
+
+            return sb.ToString();
         }
 
+        // Centro y pupila también pueden usar rotación
+        private static string DrawTwoCornerRectEyeCenter(double x, double y, double size, string color)
+        {
+            double padding = size * 0.15;
+            double centerSize = size - 2 * padding;
+            return DrawTwoCornerRectEye(x + padding, y + padding, centerSize, color);
+        }
+        private static string DrawTwoCornerRectEyePupil(double x, double y, double size, string color)
+        {
+            double padding = size * 0.25;
+            double pupilSize = size - 2 * padding;
+            return DrawTwoCornerRectEye(x + padding, y + padding, pupilSize, color);
+        }
 
+        //CornerRectoRadio
+        // Dibuja el marco exterior
+        private static string DrawBottomLeftSquareRadioEye(double x, double y, double size, string color)
+        {
+            double r = size * 0.50; // radio de las esquinas redondeadas
+            var sb = new StringBuilder();
+
+            sb.Append($"<path d='");
+            sb.Append($"M{x},{y + size} ");         // esquina inferior izquierda (cuadrada)
+            sb.Append($"L{x},{y + r} ");            // lado izquierdo
+            sb.Append($"A{r},{r} 0 0,1 {x + r},{y} ");      // esquina superior izquierda (redondeada)
+            sb.Append($"L{x + size - r},{y} ");     // lado superior
+            sb.Append($"A{r},{r} 0 0,1 {x + size},{y + r} "); // esquina superior derecha (redondeada)
+            sb.Append($"L{x + size},{y + size - r} "); // lado derecho
+            sb.Append($"A{r},{r} 0 0,1 {x + size - r},{y + size} "); // esquina inferior derecha (redondeada)
+            sb.Append($"L{x},{y + size} Z' ");      // cerrar figura
+            sb.Append($"fill='{color}'/>");
+
+            return sb.ToString();
+        }
+
+        // Centro blanco, padding medio
+        private static string DrawBottomLeftSquareRadioEyeCenter(double x, double y, double size, string color)
+        {
+            double padding = size * 0.15; // padding ajustable (ajusta 0.28-0.33 según veas)
+            double centerSize = size - 2 * padding;
+            return DrawBottomLeftSquareRadioEye(x + padding, y + padding, centerSize, color);
+        }
+
+        // Pupila, padding mayor (más pequeña)
+        private static string DrawBottomLeftSquareRadioEyePupil(double x, double y, double size, string color)
+        {
+            double padding = size * 0.25; // padding mayor para la pupila
+            double pupilSize = size - 2 * padding;
+            return DrawBottomLeftSquareRadioEye(x + padding, y + padding, pupilSize, color);
+        }
+
+        //DosAngulosRectosInterno
+        // Dibuja un marco con esquinas opuestas redondeadas (sup izq e inf der redondeadas)
+        private static string DrawTwoCornerRectInEye(double x, double y, double size, string color, bool outward = true)
+        {
+            //sb.Append($"<path d='");
+            //// Esquina superior izquierda (redondeada)
+            //sb.Append($"M{x},{y + r} ");
+            //sb.Append($"A{r},{r} 0 0,1 {x + r},{y} ");
+
+            //// Lado izquierdo (baja)
+            //sb.Append($"L{x},{y + r} ");
+
+            //// Esquina inferior izquierda (cuadrada)
+            //sb.Append($"L{x},{y + size} ");
+            //sb.Append($"L{x + size - r},{y + size} ");
+
+            //// Esquina inferior derecha (redondeada)
+            //sb.Append($"A{r},{r} 0 0,0 {x + size},{y + size - r} ");
+
+            //// Esquina superior derecha (cuadrada)
+            //sb.Append($"L{x + size},{y} ");
+            //sb.Append($"L{x + r},{y} ");
+            //sb.Append("Z' ");
+            //sb.Append($"fill='{color}'/>");
+
+            double r = size * 0.23;
+            var sb = new StringBuilder();
+
+            //sb.Append($"<path d='");
+            //// Esquina superior izquierda (redondeada)
+            //sb.Append($"M{x + r},{y} ");
+            //sb.Append($"A{r},{r} 0 0,1 {x},{y + r} ");
+            //// Lado izquierdo (baja)
+            //sb.Append($"L{x},{y + size - r} ");
+
+            //// Esquina inferior izquierda (cuadrada)
+            //sb.Append($"L{x},{y + size} ");
+            //sb.Append($"L{x + size - r},{y + size} ");
+
+            //// Esquina inferior derecha (redondeada)
+            //sb.Append($"A{r},{r} 0 0,1 {x + size},{y + size - r} ");
+            //// Lado derecho (sube)
+            //sb.Append($"L{x + size},{y + r} ");
+            //// Esquina superior derecha (cuadrada)
+            //sb.Append($"L{x + size},{y} ");
+            //sb.Append($"L{x + r},{y} ");
+            //sb.Append("Z' ");
+            //sb.Append($"fill='{color}'/>");
+
+            sb.Append($"<path d='");
+            // Esquina superior izquierda (curva)
+            sb.Append($"M{x + r},{y} ");
+            sb.Append($"A{r},{r} 0 0,1 {x},{y + r} ");
+            // Lado izquierdo (baja)
+            sb.Append($"L{x},{y + size - r} ");
+            // Esquina inferior izquierda (curva)
+            sb.Append($"A{r},{r} 0 0,0 {x + r},{y + size} ");
+            // Lado inferior (derecha)
+            sb.Append($"L{x + size - r},{y + size} ");
+            // Esquina inferior derecha (curva)
+            sb.Append($"A{r},{r} 0 0,1 {x + size},{y + size - r} ");
+            // Lado derecho (sube)
+            sb.Append($"L{x + size},{y + r} ");
+            // Esquina superior derecha (curva)
+            sb.Append($"A{r},{r} 0 0,0 {x + size - r},{y} ");
+            // Cierra
+            sb.Append($"L{x + r},{y} ");
+            sb.Append("Z' ");
+            sb.Append($"fill='{color}'/>");
+
+            return sb.ToString();
+        }
+
+        // Centro y pupila también pueden usar rotación
+        private static string DrawTwoCornerRectInEyeCenter(double x, double y, double size, string color)
+        {
+            double padding = size * 0.15;
+            double centerSize = size - 2 * padding;
+            return DrawTwoCornerRectInEye(x + padding, y + padding, centerSize, color);
+        }
+        private static string DrawTwoCornerRectInEyePupil(double x, double y, double size, string color)
+        {
+            double padding = size * 0.25;
+            double pupilSize = size - 2 * padding;
+            return DrawTwoCornerRectInEye(x + padding, y + padding, pupilSize, color);
+        }
     }
 }

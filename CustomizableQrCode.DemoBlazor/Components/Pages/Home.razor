@@ -145,7 +145,8 @@
                 AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
 
                 // Si Leaf o Diamond, fuerza el centro a ser igual al marco
-                if (TempEyeFrameShape == EyeFrameShape.Leaf || TempEyeFrameShape == EyeFrameShape.Diamond || TempEyeFrameShape == EyeFrameShape.CornerRect)
+                if (TempEyeFrameShape == EyeFrameShape.Leaf || TempEyeFrameShape == EyeFrameShape.Diamond || TempEyeFrameShape == EyeFrameShape.CornerRect
+                    || TempEyeFrameShape == EyeFrameShape.TwoCornerRect || TempEyeFrameShape == EyeFrameShape.CornerRectRadio || TempEyeFrameShape == EyeFrameShape.TwoCornerRectIn)
                 {
                     TempEyeCenterShape = (EyeCenterShape)Enum.Parse(typeof(EyeCenterShape), TempEyeFrameShape.ToString());
                     TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
