@@ -20,6 +20,7 @@ namespace CustomizableQrCode.Models
             Plus, Star, Starburst, ConcaveSquircle, DiagonalCut, TripleBar, TripleBarV, BubbleGrid, BubbleOver, BlockGrid, IrregularSquare, WavySquare
         }
 
+        public enum QrContentType { Link, Text, Email, Call, SMS, VCard, WhatsApp, WiFi, PDF, App, Images, Video, SocialMedia, Event, Barcode2D }
     }
 
     // QrModels.cs
@@ -49,4 +50,10 @@ namespace CustomizableQrCode.Models
         public int Quality { get; set; } = 512;
     }
 
+    public class QrTypeOption
+    {
+        public QrContentType Type { get; set; }
+        public string Icon { get; set; } // Clave de icono, SVG, o FontAwesome
+        public string Label { get; set; }
+    }
 }

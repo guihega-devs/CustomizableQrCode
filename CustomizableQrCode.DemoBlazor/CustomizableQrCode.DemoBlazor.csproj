@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Components\Blazor\QrTypeRadialSelector.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\Blazor\QrTypeRadialSelector.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CustomizableQrCode\CustomizableQrCode.csproj" />
   </ItemGroup>
 

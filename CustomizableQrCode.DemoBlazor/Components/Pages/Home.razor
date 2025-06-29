@@ -10,6 +10,9 @@
 <h3>Personaliza tu Código QR</h3>
 
 <div style="display:flex;gap:2rem;">
+    <QrTypeSelector @bind-SelectedType="tipoQrSeleccionado" />
+    @* <QrTypeRadialSelector /> *@
+
     <div style="min-width:320px;">
 
         <label>Contenido:</label>
@@ -29,13 +32,6 @@
             }
         </select>
 
-        <label>Marco del ojo:</label>
-        @* <select @bind="TempEyeFrameShapeStr" class="form-select">
-            @foreach (var shape in Enum.GetNames(typeof(EyeFrameShape)))
-            {
-                <option value="@shape">@shape</option>
-            }
-        </select> *@
         <label>Marco del ojo:</label>
         <select @bind="TempEyeFrameShapeStr" class="form-select">
             @foreach (var shape in Enum.GetNames(typeof(EyeFrameShape)))
@@ -132,6 +128,7 @@
     public EyeCenterShape TempEyeCenterShape { get; set; } = EyeCenterShape.Square;
     public List<EyeCenterShape> AllowedCenters { get; set; } = new List<EyeCenterShape>();
 
+    private string tipoQrSeleccionado = "Link";
 
     public string TempEyeFrameShapeStr
     {

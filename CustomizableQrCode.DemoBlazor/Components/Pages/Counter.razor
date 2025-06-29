@@ -1,19 +1,70 @@
 ﻿@page "/counter"
 @rendermode InteractiveServer
+@using CustomizableQrCode
+@using CustomizableQrCode.DemoBlazor.Components.Blazor
+@using CustomizableQrCode.Models
+@using static CustomizableQrCode.Models.QrModels
+@using Microsoft.AspNetCore.Components.Forms
 
-<PageTitle>Counter</PageTitle>
+@* <header class="main-header">
+    <div class="header-content">
+        <span class="logo">
+            <span class="logo-icon-mint">▣</span>
+            <span class="logo-main">QR</span> <span class="logo-accent-mint">Color</span>
+        </span>
+        <nav class="nav-menu" id="navMenu">
+            <a href="#">Inicio</a>
+            <a href="#">Ayuda</a>
+            <a href="#" class="ta-btn-mint">Generar QR</a>
+        </nav>
+        <button class="burger" id="burgerBtn" aria-label="Menú">&#9776;</button>
+    </div>
+</header>
+<div class="header-shadow-mint"></div>
+ *@
+@* <section class="hero-mint">
+    <h1>Genera tu QR personalizado</h1>
+    <p>Rápido, gratis y con tu propio estilo</p>
+    <button class="hero-btn-mint" onclick="document.getElementById('qrForm').scrollIntoView({behavior: 'smooth'});">
+        Empezar ahora
+    </button>
+</section> *@
 
-<h1>Counter</h1>
+<main class="container-mint">
+    <div class="card-mint" id="qrForm">
+        @* <QrTypeSelector @bind-SelectedType="tipoQrSeleccionado" /> *@
+        <QrTypeRadialSelector />
+        @* <QrTypeRadialSelector /> *@
+        @* <label class="input-label-mint">Texto/URL a codificar:</label>
+        <input type="text" placeholder="Introduce el texto o enlace" class="input-mint"> *@
 
-<p role="status">Current count: @currentCount</p>
+        @* <div class="options-mint">
+            <label>Color QR:
+                <input type="color" class="color-input-mint" value="#009FDF">
+            </label>
+            <label>Fondo:
+                <input type="color" class="color-input-mint" value="#FFD100">
+            </label>
+            <label>Tamaño:
+                <input type="range" min="1" max="5" value="3" class="slider-mint">
+            </label>
+        </div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+        <label class="input-label-mint">Logo:</label>
+        <input type="file" class="input-mint">
 
-@code {
-    private int currentCount = 0;
+        <div class="preview-mint">
+            <span class="qr-preview-placeholder">[Previsualización QR aquí]</span>
+        </div>
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
+        <div class="actions-mint">
+            <button class="mint-btn azul">Descargar PNG</button>
+            <button class="mint-btn amarillo">Descargar SVG</button>
+            <button class="mint-btn gris">Copiar enlace</button>
+        </div> *@
+    </div>
+</main>
+
+@code{
+    private string tipoQrSeleccionado = "Link";
 }

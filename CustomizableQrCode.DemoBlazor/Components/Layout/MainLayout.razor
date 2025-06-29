@@ -1,20 +1,40 @@
 ﻿@inherits LayoutComponentBase
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<div class="page">
-    <div class="sidebar">
+@*     <div class="sidebar">
         <NavMenu />
-    </div>
+    </div> *@
+    <header class="main-header">
+        <div class="header-content">
+            @* <span class="logo">
+                <span class="logo-icon-blue">▣</span>
+                QR <span class="logo-accent-blue">Color</span>
+            </span> *@
+            <a href="/" class="logo" aria-label="Ir al inicio">
+                <span class="logo-icon-blue">▣</span>
+                QR <span class="logo-accent-blue">Color</span>
+            </a>
+            <!-- Burger con aria -->
+            <button class="burger" id="burgerBtn" aria-label="Menú" aria-expanded="false" aria-controls="navMenu">&#9776;</button>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <nav class="nav-menu" id="navMenu">
+                @* <a href="/">Inicio</a> *@
+                <a href="/counter">Generar QR</a>
+                <a href="/ayuda">Ayuda</a>
+                <a href="/login" class="cta-btn-blue">Ingresar</a>
+                <a href="/registro" class="cta-btn-outline">Registrarse</a>
+            </nav>
+            @* <button class="burger" id="burgerBtn" aria-label="Menú">&#9776;</button> *@
         </div>
+    </header>
+    <div class="header-shadow-blue"></div>
+    @Body
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+
+    <footer class="footer-mint">
+        © 2024 QR Color | Contacto | Redes sociales
+    </footer>
+
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
