@@ -15,7 +15,7 @@ namespace CustomizableQrCode
         private string _backgroundGradient = "#fff";
         private string _logoBase64;
         private QrExportFormat _exportFormat = QrExportFormat.Svg;
-        private int _quality = 512;
+        private int _quality ;
 
         // Métodos de configuración (Builder pattern)
         public QrCodeBuilder WithContent(string content) { options.Content = content; return this; }

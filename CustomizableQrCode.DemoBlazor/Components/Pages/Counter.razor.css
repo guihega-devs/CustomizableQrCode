@@ -1,0 +1,24 @@
+﻿
+/* MAIN */
+.container-mint {
+    display: flex;
+    justify-content: center;
+    padding: 0 1rem;
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+}
+.card-mint {
+    background: var(--gris-claro);
+    border-radius: 1.5rem;
+    box-shadow: 0 6px 32px 0 rgba(0,0,0,0.10);
+    padding: 2rem 2.2rem 2.2rem 2.2rem;
+    min-width: 325px;
+    max-width: 60%;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+

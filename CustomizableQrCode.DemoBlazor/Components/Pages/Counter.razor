@@ -1,19 +1,25 @@
 ﻿@page "/counter"
 @rendermode InteractiveServer
+@using CustomizableQrCode
+@using CustomizableQrCode.DemoBlazor.Components.Blazor
+@using CustomizableQrCode.Models
+@using static CustomizableQrCode.Models.QrModels
+@using Microsoft.AspNetCore.Components.Forms
 
-<PageTitle>Counter</PageTitle>
+<main class="container-mint">
+    <div class="card-mint" id="qrForm">
+        <QrCompGenerator InitialContent="https://midominio.com" OnQrGenerated="OnQrReady" />
+        @* <QrTypeRadialSelector /> *@
+        @* <QrCompGenerator InitialContent="https://midominio.com" OnQrGenerated="OnQrReady" /> *@
+    </div>
+</main>
 
-<h1>Counter</h1>
+@code{
+    private string tipoQrSeleccionado = "Link";
 
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
-@code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
+    void OnQrReady(string qrImageUrl)
     {
-        currentCount++;
+        // Puedes hacer algo cuando se genere el QR
     }
+
 }

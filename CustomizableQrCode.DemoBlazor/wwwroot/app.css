@@ -1,5 +1,68 @@
+/*Variables globales*/
+
+:root {
+    --azul-marino: #003366;
+    --gris-oscuro: #333333;
+    --azul-brillante: #009FDF;
+    --amarillo-vibrante: #FFD100;
+    --gris-suave: #97999B;
+    --gris-claro: #f7f7f7;
+    --blanco: #fff;
+    --sombra: 0 4px 24px #009fdf1a;
+    --radio: 14px;
+    --input-h: 48px;
+    --font: 'Segoe UI', 'Inter', Arial, sans-serif;
+}
+/*Fin variables globales*/
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--gris-claro);
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* 100% del viewport */
+}
+
+
+main {
+    flex: 1 1 auto; /* Toma todo el espacio posible */
+}
+
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 99;
+}
+
+body.menu-open::before {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.menu-open {
+    overflow: hidden;
+}
+@media (max-width: 700px) {
+    /* Opcional: fondo semitransparente detrás del menú */
+    body.menu-open::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.50);
+        z-index: 99;
+        transition: opacity 0.2s;
+        opacity: 1;
+        pointer-events: auto;
+    }
 }
 
 a, .btn-link {
@@ -13,7 +76,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -42,9 +105,9 @@ h1:focus {
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
@@ -57,4 +120,100 @@ h1:focus {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+.qr-label {
+    font-weight: 600;
+    color: var(--azul-marino);
+    margin-bottom: 0.3rem;
+    font-size: 1rem;
+}
+
+/*.qr-input, .qr-select, .qr-textarea {
+    width: 100%;
+    height: var(--input-h);
+    padding: 0.7rem 1.2rem;
+    background: var(--gris-claro);
+    border: 2px solid var(--gris-suave);
+    border-radius: var(--radio);
+    font-size: 1.06rem;
+    color: var(--gris-oscuro);
+    outline: none;
+    transition: border-color 0.17s, box-shadow 0.18s;
+    margin-bottom: 0.5rem;
+    font-family: var(--font);
+    box-shadow: none;
+}*/
+
+.qr-input, .qr-select, .qr-textarea {
+    width: 100%;
+    padding: 0.7rem 1.2rem;
+    background: var(--gris-claro, #fafbfd);
+    border: 2px solid var(--gris-suave, #ececec);
+    border-radius: 0.6rem;
+    font-size: 1.06rem;
+    color: var(--gris-oscuro, #393929);
+    outline: none;
+    margin-bottom: 0.5rem;
+    font-family: var(--font, inherit);
+    box-shadow: none;
+    resize: none;
+}
+
+.qr-input:focus, .qr-select:focus, .qr-textarea:focus {
+    border-color: var(--azul-brillante);
+    box-shadow: 0 0 0 2px #009fdf44;
+}
+
+.qr-select {
+    appearance: none;
+    cursor: pointer;
+}
+
+.qr-textarea {
+    min-height: 95px;
+    max-height: 185px;
+    resize: vertical;
+    font-size: 1.05rem;
+}
+
+/*.qr-actions
+{
+    display: flex;
+    gap: 1.2rem;
+    margin-top: 1rem;
+}*/
+
+.qr-btn-main {
+    background: var(--azul-brillante);
+    color: var(--blanco);
+    font-weight: bold;
+    padding: 0.7rem 2.4rem;
+    border: none;
+    border-radius: var(--radio);
+    font-size: 1.07rem;
+    box-shadow: 0 2px 12px #009fdf26;
+    transition: background 0.18s, box-shadow 0.17s, transform 0.12s;
+    cursor: pointer;
+}
+
+.qr-btn-main:hover, .qr-btn-main:focus {
+    background: var(--azul-marino);
+    transform: scale(1.04);
+}
+
+.qr-btn-sec {
+    background: var(--gris-claro);
+    color: var(--azul-marino);
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radio);
+    padding: 0.7rem 2rem;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: background 0.13s;
+}
+
+.qr-btn-sec:hover {
+    background: var(--gris-suave);
 }

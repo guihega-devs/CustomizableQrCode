@@ -1,0 +1,837 @@
+﻿@using System.Threading.Tasks
+@using CustomizableQrCode.Models
+@using static CustomizableQrCode.Models.QrModels
+@inject IJSRuntime JS
+
+
+<div class="radial-selector-container" aria-label="Selector tipo de QR">
+    <div class="qr-type-selector">
+        @foreach (var opt in QrTypes)
+        {
+            var isSelected = opt.Type == SelectedType;
+            <button type="button"
+                    class="qr-type-btn @(isSelected ? "selected" : "")"
+                    title="@opt.Tooltip"
+                    @onclick="() => SelectType(opt.Type)">
+                <i class="@opt.Icon"></i>
+                <span class="qr-type-tooltip">@opt.Tooltip</span>
+            </button>
+        }
+    </div>
+    <div class="qr-main-content">
+        <!-- Izquierda: controles configurables -->
+        @* <div class="qr-config-form"> *@
+            <!-- Controles dinámicos según tipo -->
+            @* Este bloque cambia según el tipo seleccionado *@
+            <div class="qr-form-col">
+                <div class="qr-content-section">
+                    <div class="qr-config-card">
+                        @switch (SelectedType)
+                        {
+                            case QrContentType.Link:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">Enlace</label>
+                                        <InputText @bind-Value="LinkUrl" class="qr-input" placeholder="https://tu-enlace.com" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.Text:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">Texto</label>
+                                        <InputTextArea @bind-Value="TextContent" class="qr-textarea" placeholder="Introduce el texto..." />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.Email:
+                                <div class="qr-config-fields">
+                                    <div>
+                                        <label class="qr-label">Correo destinatario</label>
+                                        <InputText @bind-Value="EmailTo" class="qr-input" placeholder="ejemplo@email.com" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Asunto</label>
+                                        <InputText @bind-Value="EmailSubject" class="qr-input" placeholder="Asunto del correo" />
+                                    </div>
+                                    <div class="full-width">
+                                        <label class="qr-label">Mensaje</label>
+                                        <InputTextArea @bind-Value="EmailBody" class="qr-textarea" placeholder="Escribe tu mensaje..." />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.Call:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">Teléfono</label>
+                                        <InputText @bind-Value="Phone" class="qr-input" placeholder="Ej: +521234567890" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.SMS:
+                                <div class="qr-config-fields">
+                                    <div>
+                                        <label class="qr-label">Teléfono</label>
+                                        <InputText @bind-Value="SmsPhone" class="qr-input" placeholder="Teléfono" />
+                                    </div>
+                                    <div class="full-width">
+                                        <label class="qr-label">Mensaje SMS</label>
+                                        <InputTextArea @bind-Value="SmsMessage" class="qr-textarea" placeholder="Mensaje SMS" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.VCard:
+                                <div class="qr-config-fields">
+                                    <div>
+                                        <label class="qr-label">Nombre</label>
+                                        <InputText @bind-Value="VCardFirstName" class="qr-input" placeholder="Nombre" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Apellido</label>
+                                        <InputText @bind-Value="VCardLastName" class="qr-input" placeholder="Apellido" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Teléfono</label>
+                                        <InputText @bind-Value="VCardPhone" class="qr-input" placeholder="Teléfono" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Email</label>
+                                        <InputText @bind-Value="VCardEmail" class="qr-input" placeholder="Email" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Empresa</label>
+                                        <InputText @bind-Value="VCardCompany" class="qr-input" placeholder="Empresa" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Cargo</label>
+                                        <InputText @bind-Value="VCardJob" class="qr-input" placeholder="Cargo" />
+                                    </div>
+                                    <div class="full-width">
+                                        <label class="qr-label">Dirección</label>
+                                        <InputText @bind-Value="VCardAddress" class="qr-input" placeholder="Dirección" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.WhatsApp:
+                                <div class="qr-config-fields">
+                                    <div>
+                                        <label class="qr-label">Teléfono WhatsApp</label>
+                                        <InputText @bind-Value="WhatsAppPhone" class="qr-input" placeholder="Teléfono WhatsApp" />
+                                    </div>
+                                    <div class="full-width">
+                                        <label class="qr-label">Mensaje</label>
+                                        <InputTextArea @bind-Value="WhatsAppMessage" class="qr-textarea" placeholder="Mensaje para enviar" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.WiFi:
+                                <div class="qr-config-fields">
+                                    <div>
+                                        <label class="qr-label">Nombre de Red (SSID)</label>
+                                        <InputText @bind-Value="WiFiSSID" class="qr-input" placeholder="Nombre de red" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Contraseña</label>
+                                        <InputText @bind-Value="WiFiPassword" class="qr-input" placeholder="Contraseña" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Tipo</label>
+                                        <InputSelect @bind-Value="WiFiEncryption" class="qr-select">
+                                            <option value="WPA">WPA/WPA2</option>
+                                            <option value="WEP">WEP</option>
+                                            <option value="nopass">Sin contraseña</option>
+                                        </InputSelect>
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.PDF:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">URL del PDF</label>
+                                        <InputText @bind-Value="PdfUrl" class="qr-input" placeholder="URL del PDF" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.App:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">URL de la app</label>
+                                        <InputText @bind-Value="AppUrl" class="qr-input" placeholder="URL de la App (App Store, Play Store...)" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.Images:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">URL de la imagen</label>
+                                        <InputText @bind-Value="ImageUrl" class="qr-input" placeholder="URL de la imagen" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.Video:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">URL del video</label>
+                                        <InputText @bind-Value="VideoUrl" class="qr-input" placeholder="URL del video" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.SocialMedia:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">URL del perfil/red social</label>
+                                        <InputText @bind-Value="SocialUrl" class="qr-input" placeholder="URL del perfil social" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.Event:
+                                <div class="qr-config-fields">
+                                    <div>
+                                        <label class="qr-label">Título del evento</label>
+                                        <InputText @bind-Value="EventTitle" class="qr-input" placeholder="Título del evento" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Ubicación</label>
+                                        <InputText @bind-Value="EventLocation" class="qr-input" placeholder="Ubicación" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Fecha de inicio</label>
+                                        <InputText @bind-Value="EventStart" class="qr-input" placeholder="YYYY-MM-DD HH:mm" />
+                                    </div>
+                                    <div>
+                                        <label class="qr-label">Fecha de fin</label>
+                                        <InputText @bind-Value="EventEnd" class="qr-input" placeholder="YYYY-MM-DD HH:mm" />
+                                    </div>
+                                </div>
+                                break;
+
+                            case QrContentType.Barcode2D:
+                                <div class="qr-config-fields">
+                                    <div class="full-width">
+                                        <label class="qr-label">Contenido de código de barras</label>
+                                        <InputText @bind-Value="Barcode2DContent" class="qr-input" placeholder="Texto o número" />
+                                    </div>
+                                </div>
+                                break;
+                        }
+                
+                    </div>
+                </div>
+
+                <div class="qr-style-section">
+                    <!-- Controles comunes (personalización) -->
+                    <div class="qr-config-common">
+
+                    <EditForm Model="qrOptions">
+                        <div class="qr-card">
+
+                            <!-- 1a fila: Módulo + Ojo-Marco -->
+                            <div class="qr-row">
+                                <div class="qr-group-double">
+                                    <label>Forma módulo</label>
+                                    <div class="qr-inline-group">
+                                        <InputSelect @bind-Value="qrOptions.ModuleShape" class="qr-input">
+                                            @foreach (var shape in Enum.GetNames(typeof(ModuleShape)))
+                                            {
+                                                <option value="@shape">@shape</option>
+                                            }
+                                        </InputSelect>
+                                        <input type="color" @bind="qrOptions.ModuleColor" class="qr-color" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 1a fila: Módulo + Ojo-Marco -->
+                            <div class="qr-row">
+                                <div class="qr-group-double">
+                                    <label>Marco - Ojo</label>
+                                    <div class="qr-inline-group">
+                                        <InputSelect @bind-Value="qrOptions.EyeFrameShape" class="qr-input">
+                                            @foreach (var shape in Enum.GetNames(typeof(EyeFrameShape)))
+                                            {
+                                                <option value="@shape">@shape</option>
+                                            }
+                                        </InputSelect>
+                                        <input type="color" @bind="qrOptions.EyeFrameColor" class="qr-color" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2a fila: Ojo-Centro + Ojo-retro -->
+                            <div class="qr-row">
+                                <div class="qr-group-double">
+                                    <label>Centro - Ojo</label>
+                                    <div class="qr-inline-group">
+                                        <InputSelect @bind-Value="qrOptions.EyeCenterShape" class="qr-input">
+                                            @foreach (var center in AllowedCenters)
+                                            {
+                                                <option value="@center">@center</option>
+                                            }
+                                        </InputSelect>
+                                        <input type="color" @bind="qrOptions.EyeCenterColor" class="qr-color" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3a fila: Corrección + Tamaño -->
+                            <div class="qr-row">
+                                <div class="qr-group-simple">
+                                    <label>Corrección</label>
+                                    <InputSelect @bind-Value="qrOptions.CorrectionLevel" class="qr-input">
+                                        @foreach (var level in Enum.GetNames(typeof(QrCorrectionLevel)))
+                                        {
+                                            <option value="@level">@level</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="qr-group-simple">
+                                    <label>Tamaño (px)</label>
+                                    <InputNumber @bind-Value="qrOptions.Size" min="128" max="1024" class="qr-input" />
+                                </div>
+                                <div class="qr-group-simple">
+                                    <label>Calidad</label>
+                                    <InputNumber @bind-Value="qrOptions.Quality" min="60" max="100" class="qr-input" />
+                                </div>
+                            </div>
+
+                            <!-- 4a fila: Calidad + Logo -->
+                            <div class="qr-row">
+                                
+                                <div class="qr-group-simple">
+                                    <label>Logo central</label>
+                                    <InputFile OnChange="OnLogoChanged" class="qr-file" />
+                                    @* @if (!string.IsNullOrEmpty(logoPreviewUrl))
+                                    {
+                                        <div class="qr-logo-preview">
+                                            <img src="@logoPreviewUrl" alt="Preview Logo" />
+                                        </div>
+                                    } *@
+                                </div>
+                            </div>
+
+                        </div>
+                    </EditForm>
+
+
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="qr-preview-col">
+                <div class="qr-svg-container">
+                    @* <CustomQrCode Content="@Content"
+                                  ModuleShapeStr="@ModuleShapeStr"
+                                  ModuleColor="@ModuleColor"
+                                  EyeFrameShapeStr="@TempEyeFrameShapeStr"
+                                  EyeFrameColor="@EyeFrameColor"
+                                  EyeCenterShapeStr="@TempEyeCenterShapeStr"
+                                  EyeCenterColor="@EyeCenterColor"
+                                  BackgroundGradient="@BgColor"
+                                  ExportFormatStr="@ExportFormatStr"
+                                  Size="@Size"
+                                  CorrectionLevelStr="@CorrectionLevelStr"
+                                  LogoBase64="@LogoBase64" /> *@
+                <CustomQrCode QrOptions="qrOptions" />
+                </div>
+                <div class="qr-actions">
+                    <button class="btn btn-success mt-3" @onclick="GenerateQr">Generar QR</button>
+                    <button class="btn btn-primary mt-3 ms-2" @onclick="DownloadSvg">Descargar SVG</button>
+                </div>
+                @* Mostrar contenido QR SOLO en entorno de pruebas DEBUG *@
+                @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Test")
+                {
+                    <div data-test-qr-content="@qrOptions.Content" style="display:none"></div>
+                }
+            </div>
+        @* </div> *@
+    </div>
+</div>
+
+@code {
+
+    [Parameter] public string InitialContent { get; set; } = "";
+    [Parameter] public EventCallback<string> OnQrGenerated { get; set; }
+
+    QrCodeOptions qrOptions = new QrCodeOptions();
+
+    List<QrTypeOption> QrTypes = new()
+    {
+        new() { Type = QrContentType.Link,      Icon = "fas fa-link",         Label = "Enlace",      Tooltip = "Genera un QR para un enlace web." },
+        new() { Type = QrContentType.Call,      Icon = "fas fa-phone",        Label = "Llamada",     Tooltip = "Inicia una llamada telefónica." },
+        new() { Type = QrContentType.VCard,     Icon = "fas fa-user",         Label = "vCard",       Tooltip = "Agrega contacto a la agenda." },
+        new() { Type = QrContentType.SMS,       Icon = "fas fa-comment-alt",  Label = "SMS",         Tooltip = "Envía un mensaje SMS." },
+        new() { Type = QrContentType.Email,     Icon = "fas fa-envelope",     Label = "Email",       Tooltip = "Correo electrónico prellenado." },
+        new() { Type = QrContentType.Text,      Icon = "fas fa-align-left",   Label = "Texto",       Tooltip = "Comparte un mensaje de texto." },
+        new() { Type = QrContentType.WhatsApp,  Icon = "fab fa-whatsapp",     Label = "WhatsApp",    Tooltip = "Abre chat de WhatsApp." },
+        new() { Type = QrContentType.WiFi,      Icon = "fas fa-wifi",         Label = "WiFi",        Tooltip = "Conéctate a una red WiFi." },
+        new() { Type = QrContentType.PDF,       Icon = "fas fa-file-pdf",     Label = "PDF",         Tooltip = "Descarga un archivo PDF." },
+        new() { Type = QrContentType.App,       Icon = "fas fa-mobile-alt",   Label = "App",         Tooltip = "Redirige a una app móvil." },
+        new() { Type = QrContentType.Images,    Icon = "fas fa-image",        Label = "Imagen",      Tooltip = "Muestra una imagen." },
+        new() { Type = QrContentType.Video,     Icon = "fas fa-video",        Label = "Video",       Tooltip = "Muestra un video." },
+        new() { Type = QrContentType.SocialMedia,Icon = "fas fa-hashtag",     Label = "Social",      Tooltip = "Perfil/red social." },
+        new() { Type = QrContentType.Event,     Icon = "fas fa-calendar-check",Label = "Evento",     Tooltip = "Evento de calendario (iCal)." },
+        new() { Type = QrContentType.Barcode2D, Icon = "fas fa-barcode",      Label = "Código 2D",   Tooltip = "Código de barras (DataMatrix, etc)." },
+    };
+
+    public QrContentType SelectedType { get; set; } = QrContentType.Link; // <--- NO string
+
+    int SelectedIndex = 0;
+    string CenterFadeClass = "";
+
+    // Referencias a los botones, usando el Id único
+    ElementReference[] ButtonRefs = new ElementReference[20]; // O ajusta el tamaño a tus opciones
+
+    double GetAngle(int i) => i * (360.0 / QrTypes.Count);
+
+    void SelectType(QrContentType type)
+    {
+        if (SelectedType != type)
+        {
+            SelectedType = type;
+            StateHasChanged();
+        }
+    }
+
+    QrTypeOption SelectedOption => QrTypes.FirstOrDefault(o => o.Type == SelectedType);
+
+    string QrContent { get; set; }
+    void OnQrReady(string qrImageUrl)
+    {
+        // Puedes hacer algo cuando se genere el QR
+    }
+
+    // --- Campos para cada tipo ---
+    // LINK
+    private string LinkUrl { get; set; }
+
+    // TEXT
+    private string TextContent { get; set; }
+
+    // EMAIL
+    private string EmailTo { get; set; }
+    private string EmailSubject { get; set; }
+    private string EmailBody { get; set; }
+
+    // CALL
+    private string Phone { get; set; }
+
+    // SMS
+    private string SmsPhone { get; set; }
+    private string SmsMessage { get; set; }
+
+    // VCARD
+    private string VCardFirstName { get; set; }
+    private string VCardLastName { get; set; }
+    private string VCardPhone { get; set; }
+    private string VCardEmail { get; set; }
+    private string VCardCompany { get; set; }
+    private string VCardJob { get; set; }
+    private string VCardAddress { get; set; }
+
+    // WHATSAPP
+    private string WhatsAppPhone { get; set; }
+    private string WhatsAppMessage { get; set; }
+
+    // WIFI
+    private string WiFiSSID { get; set; }
+    private string WiFiPassword { get; set; }
+    private string WiFiEncryption { get; set; } = "WPA";
+
+    // PDF
+    private string PdfUrl { get; set; }
+
+    // APP
+    private string AppUrl { get; set; }
+
+    // IMAGES
+    private string ImageUrl { get; set; }
+
+    // VIDEO
+    private string VideoUrl { get; set; }
+
+    // SOCIAL
+    private string SocialUrl { get; set; }
+
+    // EVENT
+    private string EventTitle { get; set; }
+    private string EventLocation { get; set; }
+    private string EventStart { get; set; }
+    private string EventEnd { get; set; }
+
+    // BARCODE 2D
+    private string Barcode2DContent { get; set; }
+
+    // Opcional: Método para mostrar un ícono por tipo (puedes cambiar por <i class="fa ..."> si usas FontAwesome)
+    string GetTypeIcon(QrContentType type) => type switch
+    {
+        QrContentType.Link => "<i class='fas fa-link'></i>",
+        QrContentType.Text => "<i class='fas fa-font'></i>",
+        QrContentType.Email => "<i class='fas fa-envelope'></i>",
+        QrContentType.Call => "<i class='fas fa-phone'></i>",
+        QrContentType.SMS => "<i class='fas fa-sms'></i>",
+        QrContentType.VCard => "<i class='fas fa-id-card'></i>",
+        QrContentType.WhatsApp => "<i class='fab fa-whatsapp'></i>",
+        QrContentType.WiFi => "<i class='fas fa-wifi'></i>",
+        QrContentType.PDF => "<i class='fas fa-file-pdf'></i>",
+        QrContentType.App => "<i class='fas fa-mobile-alt'></i>",
+        QrContentType.Images => "<i class='fas fa-image'></i>",
+        QrContentType.Video => "<i class='fas fa-video'></i>",
+        QrContentType.SocialMedia => "<i class='fas fa-users'></i>",
+        QrContentType.Event => "<i class='fas fa-calendar-alt'></i>",
+        QrContentType.Barcode2D => "<i class='fas fa-barcode'></i>",
+        _ => "<i class='fas fa-qrcode'></i>"
+    };
+
+    private void Limpiar()
+    {
+        LinkUrl = TextContent = EmailTo = EmailSubject = EmailBody = Phone = SmsPhone = SmsMessage =
+        VCardFirstName = VCardLastName = VCardPhone = VCardEmail = VCardCompany = VCardJob = VCardAddress =
+        WhatsAppPhone = WhatsAppMessage = WiFiSSID = WiFiPassword = PdfUrl = AppUrl = ImageUrl = VideoUrl =
+        SocialUrl = EventTitle = EventLocation = EventStart = EventEnd = Barcode2DContent = "";
+        WiFiEncryption = "WPA";
+    }
+
+    // Métodos auxiliares para formatos especiales
+    private string BuildVCard()
+    {
+        return
+        $@"BEGIN:VCARD
+        VERSION:3.0
+        N:{VCardLastName};{VCardFirstName}
+        FN:{VCardFirstName} {VCardLastName}
+        ORG:{VCardCompany}
+        TITLE:{VCardJob}
+        TEL:{VCardPhone}
+        EMAIL:{VCardEmail}
+        ADR:{VCardAddress}
+        END:VCARD";
+    }
+
+    private string BuildEvent()
+    {
+        // Evento en formato iCal básico (ajustar para tu caso real)
+        return
+        $@"BEGIN:VEVENT
+        SUMMARY:{EventTitle}
+        LOCATION:{EventLocation}
+        DTSTART:{EventStart}
+        DTEND:{EventEnd}
+        END:VEVENT";
+    }
+
+    /*Personalizacion*/
+
+    // Variables para mostrar QR
+    public string Content { get; set; } = "https://midominio.com";
+    public string ModuleShapeStr { get; set; } = "Square";
+    public string ModuleColor { get; set; } = "#4a90e2";
+    public string EyeFrameShapeStr { get; set; } = "Square";
+    public string EyeFrameColor { get; set; } = "#000000";
+    public string EyeCenterShapeStr { get; set; } = "Square";
+    public string EyeCenterColor { get; set; } = "#000000";
+    public string BgColor { get; set; } = "#ffffff";
+    public string ExportFormatStr { get; set; } = "Svg";
+    // public int Size
+    // {
+    //     get
+    //     {
+    //         if (windowWidth < 500) return 200;
+    //         if (windowWidth < 1200) return 300;
+    //         if (windowWidth < 2000) return 400;
+    //         return 512;
+    //     }
+    //     set
+    //     {
+    //     }
+    // }
+    public int Size => CalcularTamañoPorVentana(windowWidth);
+
+    public string CorrectionLevelStr { get; set; } = "Q";
+    public string LogoBase64 { get; set; }
+
+    private int windowWidth; // Default inicial
+
+    // Variables temporales para el formulario
+    public string TempContent { get; set; }
+    public string TempModuleShapeStr { get; set; }
+    public string TempModuleColor { get; set; }
+
+    public string TempEyeFrameColor { get; set; }
+
+    //public string TempEyeCenterShapeStr { get; set; } = EyeCenterShape.Square.ToString();
+
+    public string TempEyeCenterColor { get; set; }
+    public string TempBgColor { get; set; }
+    public string TempExportFormatStr { get; set; }
+    public int TempSize { get; set; }
+    public string TempCorrectionLevelStr { get; set; }
+    public string TempLogoBase64 { get; set; }
+
+    // Campos privados de backing
+    private string tempEyeFrameShapeStr = "Square";
+    private string tempEyeCenterShapeStr = "Square";
+
+    // Enum en uso
+    public EyeFrameShape TempEyeFrameShape { get; set; } = EyeFrameShape.Square;
+    public EyeCenterShape TempEyeCenterShape { get; set; } = EyeCenterShape.Square;
+    public List<EyeCenterShape> AllowedCenters { get; set; } = new List<EyeCenterShape>();
+
+    private string tipoQrSeleccionado = "Link";
+
+
+    public string TempEyeFrameShapeStr
+    {
+        get => tempEyeFrameShapeStr;
+        set
+        {
+            if (tempEyeFrameShapeStr != value)
+            {
+                tempEyeFrameShapeStr = value;
+                TempEyeFrameShape = Enum.Parse<EyeFrameShape>(value);
+                AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+
+                // Si Leaf o Diamond, fuerza el centro a ser igual al marco
+                if (TempEyeFrameShape == EyeFrameShape.Leaf || TempEyeFrameShape == EyeFrameShape.Diamond || TempEyeFrameShape == EyeFrameShape.CornerRect
+                    || TempEyeFrameShape == EyeFrameShape.TwoCornerRect || TempEyeFrameShape == EyeFrameShape.CornerRectRadio || TempEyeFrameShape == EyeFrameShape.TwoCornerRectIn)
+                {
+                    TempEyeCenterShape = (EyeCenterShape)Enum.Parse(typeof(EyeCenterShape), TempEyeFrameShape.ToString());
+                    TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+                }
+                // Si la forma actual no está permitida, cambia a la primera
+                else if (!AllowedCenters.Contains(TempEyeCenterShape))
+                {
+                    TempEyeCenterShape = AllowedCenters[0];
+                    TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+                }
+
+                StateHasChanged();
+            }
+        }
+    }
+
+    public string TempEyeCenterShapeStr
+    {
+        get => tempEyeCenterShapeStr;
+        set
+        {
+            if (tempEyeCenterShapeStr != value)
+            {
+                tempEyeCenterShapeStr = value;
+                TempEyeCenterShape = Enum.Parse<EyeCenterShape>(value);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        QrContent = InitialContent;
+
+        //qrOptions.Size = Size;
+        // Inicializa enums desde los strings
+        TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
+        TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
+
+        AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+        if (!AllowedCenters.Contains(TempEyeCenterShape))
+        {
+            TempEyeCenterShape = AllowedCenters[0];
+            TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        }
+
+        TempContent = Content;
+        TempModuleShapeStr = ModuleShapeStr;
+        TempModuleColor = ModuleColor;
+        TempEyeFrameShapeStr = EyeFrameShapeStr;
+        TempEyeFrameColor = EyeFrameColor;
+        TempEyeCenterShapeStr = EyeCenterShapeStr;
+        TempEyeCenterColor = EyeCenterColor;
+        TempBgColor = BgColor;
+        TempExportFormatStr = ExportFormatStr;
+        TempSize = Size;
+        TempCorrectionLevelStr = CorrectionLevelStr;
+        TempLogoBase64 = LogoBase64;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            windowWidth = await JS.InvokeAsync<int>("getWindowWidth");
+            qrOptions.Size = CalcularTamañoPorVentana(windowWidth);
+            StateHasChanged();
+        }
+    }
+
+    private int CalcularTamañoPorVentana(int width)
+    {
+        if (width < 500) return 200;
+        if (width < 1200) return 300;
+        if (width < 2000) return 400;
+        return 512;
+    }
+
+    private void GenerateQr()
+    {
+        // // Actualiza enums desde los strings
+        // TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
+        // TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
+
+        // AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+
+        // if (!AllowedCenters.Contains(TempEyeCenterShape))
+        // {
+        //     TempEyeCenterShape = AllowedCenters[0];
+        //     TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        // }
+
+        // Content = TempContent;
+        // ModuleShapeStr = TempModuleShapeStr;
+        // ModuleColor = TempModuleColor;
+        // EyeFrameShapeStr = TempEyeFrameShapeStr;
+        // EyeFrameColor = TempEyeFrameColor;
+        // EyeCenterShapeStr = TempEyeCenterShapeStr;
+        // EyeCenterColor = TempEyeCenterColor;
+        // BgColor = TempBgColor;
+        // ExportFormatStr = TempExportFormatStr;
+        // Size = TempSize;
+        // CorrectionLevelStr = TempCorrectionLevelStr;
+        // LogoBase64 = TempLogoBase64;
+        // StateHasChanged();
+        // --- Arma el contenido principal para el QR ---
+        switch (SelectedType)
+        {
+            case QrContentType.Link:
+                qrOptions.Content = LinkUrl;
+                break;
+            case QrContentType.Text:
+                qrOptions.Content = TextContent;
+                break;
+            case QrContentType.Email:
+                qrOptions.Content = $"mailto:{EmailTo}?subject={Uri.EscapeDataString(EmailSubject)}&body={Uri.EscapeDataString(EmailBody)}";
+                break;
+            case QrContentType.Call:
+                qrOptions.Content = $"tel:{Phone}";
+                break;
+            case QrContentType.SMS:
+                qrOptions.Content = $"sms:{SmsPhone}?body={Uri.EscapeDataString(SmsMessage)}";
+                break;
+            case QrContentType.VCard:
+                qrOptions.Content = BuildVCard();
+                break;
+            case QrContentType.WhatsApp:
+                var msg = string.IsNullOrWhiteSpace(WhatsAppMessage) ? "" : $"?text={Uri.EscapeDataString(WhatsAppMessage)}";
+                qrOptions.Content = $"https://wa.me/{WhatsAppPhone}{msg}";
+                break;
+            case QrContentType.WiFi:
+                qrOptions.Content = $"WIFI:T:{WiFiEncryption};S:{WiFiSSID};P:{WiFiPassword};;";
+                break;
+            case QrContentType.PDF:
+                qrOptions.Content = PdfUrl;
+                break;
+            case QrContentType.App:
+                qrOptions.Content = AppUrl;
+                break;
+            case QrContentType.Images:
+                qrOptions.Content = ImageUrl;
+                break;
+            case QrContentType.Video:
+                qrOptions.Content = VideoUrl;
+                break;
+            case QrContentType.SocialMedia:
+                qrOptions.Content = SocialUrl;
+                break;
+            case QrContentType.Event:
+                qrOptions.Content = BuildEvent();
+                break;
+            case QrContentType.Barcode2D:
+                qrOptions.Content = Barcode2DContent;
+                break;
+            default:
+                qrOptions.Content = "";
+                break;
+        }
+
+        // --- Aquí puedes actualizar cualquier otro campo de qrOptions si fuera necesario ---
+        qrOptions.ModuleShape = Enum.Parse<ModuleShape>(qrOptions.ModuleShape.ToString());
+        qrOptions.ModuleColor = qrOptions.ModuleColor;
+        qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(qrOptions.EyeFrameShape.ToString());
+        qrOptions.EyeFrameColor = qrOptions.EyeFrameColor;
+        qrOptions.EyeCenterShape = Enum.Parse<EyeCenterShape>(qrOptions.EyeCenterShape.ToString());
+        qrOptions.EyeCenterColor = qrOptions.EyeCenterColor;
+        qrOptions.BgColor = qrOptions.BgColor;
+        qrOptions.CorrectionLevel = qrOptions.CorrectionLevel;
+        qrOptions.Size = qrOptions.Size;
+        qrOptions.Quality = qrOptions.Quality;
+        qrOptions.LogoBase64 = qrOptions.LogoBase64;
+
+        // Esto fuerza la actualización del QR generado
+        StateHasChanged();
+    }
+
+    public async Task OnLogoChanged(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer, 0, (int)file.Size);
+        TempLogoBase64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    // Cuando el usuario cambia el marco del ojo
+    private void OnFrameShapeChanged(ChangeEventArgs e)
+    {
+        // Si usas string, convierte a Enum
+        TempEyeFrameShapeStr = e.Value.ToString();
+        TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
+        AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+
+        // Para Leaf o Diamond: fuerza a que la forma del ojo sea igual que el marco (por defecto)
+        if (TempEyeFrameShape == EyeFrameShape.Leaf || TempEyeFrameShape == EyeFrameShape.Diamond || TempEyeFrameShape == EyeFrameShape.CornerRect)
+        {
+            TempEyeCenterShape = (EyeCenterShape)Enum.Parse(typeof(EyeCenterShape), TempEyeFrameShape.ToString());
+            TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        }
+        else if (!AllowedCenters.Contains(TempEyeCenterShape))
+        {
+            TempEyeCenterShape = AllowedCenters[0];
+            TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        }
+
+        StateHasChanged();
+    }
+
+    public List<EyeCenterShape> GetAllowedCenters(EyeFrameShape marco)
+    {
+        // Si es Leaf o Diamond: solo ellos + Circle
+        if (marco == EyeFrameShape.Leaf)
+            return new List<EyeCenterShape> { EyeCenterShape.Leaf, EyeCenterShape.Circle };
+        if (marco == EyeFrameShape.Diamond)
+            return new List<EyeCenterShape> { EyeCenterShape.Diamond, EyeCenterShape.Circle };
+        // Para el resto, todas las opciones
+        return Enum.GetValues(typeof(EyeCenterShape)).Cast<EyeCenterShape>().ToList();
+    }
+
+    private void OnCenterShapeChanged()
+    {
+        //TempEyeCenterShapeStr = e.Value.ToString();
+        TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
+    }
+
+    private void DownloadSvg()
+    {
+        // Implementa la descarga (JS interop o download link)
+    }
+}

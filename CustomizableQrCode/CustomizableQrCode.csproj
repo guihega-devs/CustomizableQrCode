@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Blazor\" />
+    <Folder Include="Logic\" />
     <Folder Include="QrStyles\" />
   </ItemGroup>
 
