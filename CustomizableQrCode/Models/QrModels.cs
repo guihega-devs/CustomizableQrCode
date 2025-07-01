@@ -20,13 +20,30 @@ namespace CustomizableQrCode.Models
             Plus, Star, Starburst, ConcaveSquircle, DiagonalCut, TripleBar, TripleBarV, BubbleGrid, BubbleOver, BlockGrid, IrregularSquare, WavySquare
         }
 
-        public enum QrContentType { Link, Text, Email, Call, SMS, VCard, WhatsApp, WiFi, PDF, App, Images, Video, SocialMedia, Event, Barcode2D }
+        public enum QrContentType
+        {
+            Link,        // URL
+            Text,        // Texto plano
+            Email,       // Correo electrónico
+            Call,        // Llamada telefónica
+            SMS,         // Mensaje SMS
+            VCard,       // Contacto
+            WhatsApp,    // Mensaje WhatsApp
+            WiFi,        // Conexión WiFi
+            PDF,         // Archivo PDF
+            App,         // App móvil
+            Images,      // Imágenes
+            Video,       // Video
+            SocialMedia, // Red social
+            Event,       // Evento (iCal)
+            Barcode2D    // Código de barras
+        }
     }
 
     // QrModels.cs
     public class QrCodeOptions
     {
-        public string Content { get; set; } = "https://midominio.com";
+        public string Content { get; set; } = "Hola mundo";
         public ModuleShape ModuleShape { get; set; } = ModuleShape.Square;
 
         // Ojo - marco (borde)
@@ -45,15 +62,18 @@ namespace CustomizableQrCode.Models
         public string BgColor { get; set; } = "#ffffff";
 
         public QrCorrectionLevel CorrectionLevel { get; set; } = QrCorrectionLevel.Q;
-        public int Size { get; set; } = 512;
+        public int Size { get; set; }
         public string? LogoBase64 { get; set; }
-        public int Quality { get; set; } = 512;
+        public int Quality { get; set; }
+        public string ExportFormat { get; set; } = "svg";
     }
 
     public class QrTypeOption
     {
         public QrContentType Type { get; set; }
-        public string Icon { get; set; } // Clave de icono, SVG, o FontAwesome
+        public string Icon { get; set; }
+        public string Tooltip { get; set; }
         public string Label { get; set; }
+        public double Angle { get; set; }
     }
 }

@@ -50,3 +50,5 @@ window.restartRadialPulse = function (element) {
     void element.offsetWidth;
     element.classList.add('pulse');
 }
+
+window.getWindowWidth = () => window.innerWidth;

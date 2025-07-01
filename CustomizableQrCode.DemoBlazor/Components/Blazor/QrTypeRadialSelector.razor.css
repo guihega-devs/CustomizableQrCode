@@ -83,7 +83,7 @@
         0 2px 32px #ffd10024;
     z-index: 5;
     /* Animación pop */
-    animation: popSelected 0.24s cubic-bezier(.7,1.5,.2,1) 1;
+/*    animation: popSelected 0.24s cubic-bezier(.7,1.5,.2,1) 1;*/
 }
 
 @keyframes popSelected {

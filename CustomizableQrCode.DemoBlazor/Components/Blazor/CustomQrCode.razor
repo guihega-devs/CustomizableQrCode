@@ -16,6 +16,8 @@
     [Parameter] public string ExportFormatStr { get; set; }
     [Parameter] public string CorrectionLevelStr { get; set; }
 
+    [Parameter]
+    public QrCodeOptions QrOptions { get; set; } = new QrCodeOptions();
 
 
     private string? SvgContent;
@@ -23,27 +25,40 @@
     protected override void OnParametersSet()
     {
         // Conversión segura de enums, con fallback a default si el string no es válido
-        var moduleShape = TryParseEnum<ModuleShape>(ModuleShapeStr, ModuleShape.Square);
-        var eyeFrameShape = TryParseEnum<EyeFrameShape>(EyeFrameShapeStr, EyeFrameShape.Square);
-        var eyeCenterShape = TryParseEnum<EyeCenterShape>(EyeCenterShapeStr, EyeCenterShape.Square);
-        var exportFormat = TryParseEnum<QrExportFormat>(ExportFormatStr, QrExportFormat.Svg);
-        var correctionLevel = TryParseEnum<QrCorrectionLevel>(CorrectionLevelStr, QrCorrectionLevel.Q);
+        // var moduleShape = TryParseEnum<ModuleShape>(ModuleShapeStr, ModuleShape.Square);
+        // var eyeFrameShape = TryParseEnum<EyeFrameShape>(EyeFrameShapeStr, EyeFrameShape.Square);
+        // var eyeCenterShape = TryParseEnum<EyeCenterShape>(EyeCenterShapeStr, EyeCenterShape.Square);
+        // var exportFormat = TryParseEnum<QrExportFormat>(ExportFormatStr, QrExportFormat.Svg);
+        // var correctionLevel = TryParseEnum<QrCorrectionLevel>(CorrectionLevelStr, QrCorrectionLevel.Q);
+
+        if (QrOptions is null)
+        {
+            SvgContent = string.Empty;
+            return;
+        }
+
+        var moduleShape = TryParseEnum<ModuleShape>(QrOptions.ModuleShape.ToString(), ModuleShape.Square);
+        var eyeFrameShape = TryParseEnum<EyeFrameShape>(QrOptions.EyeFrameShape.ToString(), EyeFrameShape.Square);
+        var eyeCenterShape = TryParseEnum<EyeCenterShape>(QrOptions.EyeCenterShape.ToString(), EyeCenterShape.Square);
+        var exportFormat = TryParseEnum<QrExportFormat>(QrOptions.ExportFormat.ToString(), QrExportFormat.Svg);
+        var correctionLevel = TryParseEnum<QrCorrectionLevel>(QrOptions.CorrectionLevel.ToString(), QrCorrectionLevel.Q);
+
         // --- RESTRICCIÓN de forma de ojo según marco ---
         eyeCenterShape = EnforceEyeCenterShapeRestriction(eyeFrameShape, eyeCenterShape);
 
         var qr = new QrCodeBuilder()
-            .WithContent(Content ?? "https://midominio.com")
+            .WithContent(QrOptions.Content ?? "https://midominio.com")
             .WithModuleShape(moduleShape)
-            .WithModuleColor(ModuleColor ?? "#4a90e2")
+            .WithModuleColor(QrOptions.ModuleColor ?? "#4a90e2")
             .WithEyeFrameShape(eyeFrameShape)
-            .WithEyeFrameColor(EyeFrameColor ?? "#000000")
+            .WithEyeFrameColor(QrOptions.EyeFrameColor ?? "#000000")
             .WithEyeCenterShape(eyeCenterShape)
-            .WithEyeCenterColor(EyeCenterColor ?? "#000000")
+            .WithEyeCenterColor(QrOptions.EyeCenterColor ?? "#000000")
             .WithBackgroundGradient(BackgroundGradient ?? "#fff")
             .WithExportFormat(exportFormat)
             .WithCorrectionLevel(correctionLevel)
-            .WithSize(Size > 0 ? Size : 512)
-            .WithLogoBase64(LogoBase64)
+            .WithSize(QrOptions.Size > 0 ? QrOptions.Size : 512)
+            .WithLogoBase64(QrOptions.LogoBase64)
             .Build();
 
         SvgContent = qr.AsSvg();

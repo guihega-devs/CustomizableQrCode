@@ -13,10 +13,12 @@
     box-shadow: 0 6px 32px 0 rgba(0,0,0,0.10);
     padding: 2rem 2.2rem 2.2rem 2.2rem;
     min-width: 325px;
-    max-width: 50%;
+    max-width: 60%;
     width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
 }
+
+
