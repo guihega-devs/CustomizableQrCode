@@ -24,19 +24,12 @@
 
     protected override void OnParametersSet()
     {
-        // Conversión segura de enums, con fallback a default si el string no es válido
-        // var moduleShape = TryParseEnum<ModuleShape>(ModuleShapeStr, ModuleShape.Square);
-        // var eyeFrameShape = TryParseEnum<EyeFrameShape>(EyeFrameShapeStr, EyeFrameShape.Square);
-        // var eyeCenterShape = TryParseEnum<EyeCenterShape>(EyeCenterShapeStr, EyeCenterShape.Square);
-        // var exportFormat = TryParseEnum<QrExportFormat>(ExportFormatStr, QrExportFormat.Svg);
-        // var correctionLevel = TryParseEnum<QrCorrectionLevel>(CorrectionLevelStr, QrCorrectionLevel.Q);
-
         if (QrOptions is null)
         {
             SvgContent = string.Empty;
             return;
         }
-
+        
         var moduleShape = TryParseEnum<ModuleShape>(QrOptions.ModuleShape.ToString(), ModuleShape.Square);
         var eyeFrameShape = TryParseEnum<EyeFrameShape>(QrOptions.EyeFrameShape.ToString(), EyeFrameShape.Square);
         var eyeCenterShape = TryParseEnum<EyeCenterShape>(QrOptions.EyeCenterShape.ToString(), EyeCenterShape.Square);

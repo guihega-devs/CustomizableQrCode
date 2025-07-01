@@ -20,7 +20,6 @@
     </div>
     <div class="qr-main-content">
         <!-- Izquierda: controles configurables -->
-        @* <div class="qr-config-form"> *@
             <!-- Controles dinámicos según tipo -->
             @* Este bloque cambia según el tipo seleccionado *@
             <div class="qr-form-col">
@@ -298,7 +297,7 @@
                                     </InputSelect>
                                 </div>
                                 <div class="qr-group-simple">
-                                    <label>Tamaño (px)</label>
+                                    <label>Tamaño</label>
                                     <InputNumber @bind-Value="qrOptions.Size" min="128" max="1024" class="qr-input" />
                                 </div>
                                 <div class="qr-group-simple">
@@ -333,29 +332,12 @@
             </div>
             <div class="qr-preview-col">
                 <div class="qr-svg-container">
-                    @* <CustomQrCode Content="@Content"
-                                  ModuleShapeStr="@ModuleShapeStr"
-                                  ModuleColor="@ModuleColor"
-                                  EyeFrameShapeStr="@TempEyeFrameShapeStr"
-                                  EyeFrameColor="@EyeFrameColor"
-                                  EyeCenterShapeStr="@TempEyeCenterShapeStr"
-                                  EyeCenterColor="@EyeCenterColor"
-                                  BackgroundGradient="@BgColor"
-                                  ExportFormatStr="@ExportFormatStr"
-                                  Size="@Size"
-                                  CorrectionLevelStr="@CorrectionLevelStr"
-                                  LogoBase64="@LogoBase64" /> *@
                 <CustomQrCode QrOptions="qrOptions" />
                 </div>
                 <div class="qr-actions">
                     <button class="btn btn-success mt-3" @onclick="GenerateQr">Generar QR</button>
                     <button class="btn btn-primary mt-3 ms-2" @onclick="DownloadSvg">Descargar SVG</button>
                 </div>
-                @* Mostrar contenido QR SOLO en entorno de pruebas DEBUG *@
-                @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Test")
-                {
-                    <div data-test-qr-content="@qrOptions.Content" style="display:none"></div>
-                }
             </div>
         @* </div> *@
     </div>
@@ -545,19 +527,6 @@
     public string EyeCenterColor { get; set; } = "#000000";
     public string BgColor { get; set; } = "#ffffff";
     public string ExportFormatStr { get; set; } = "Svg";
-    // public int Size
-    // {
-    //     get
-    //     {
-    //         if (windowWidth < 500) return 200;
-    //         if (windowWidth < 1200) return 300;
-    //         if (windowWidth < 2000) return 400;
-    //         return 512;
-    //     }
-    //     set
-    //     {
-    //     }
-    // }
     public int Size => CalcularTamañoPorVentana(windowWidth);
 
     public string CorrectionLevelStr { get; set; } = "Q";
@@ -571,8 +540,6 @@
     public string TempModuleColor { get; set; }
 
     public string TempEyeFrameColor { get; set; }
-
-    //public string TempEyeCenterShapeStr { get; set; } = EyeCenterShape.Square.ToString();
 
     public string TempEyeCenterColor { get; set; }
     public string TempBgColor { get; set; }
@@ -640,7 +607,6 @@
     {
         QrContent = InitialContent;
 
-        //qrOptions.Size = Size;
         // Inicializa enums desde los strings
         TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
         TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
@@ -679,38 +645,16 @@
     private int CalcularTamañoPorVentana(int width)
     {
         if (width < 500) return 200;
+        if (width < 700) return 225;
+        if (width < 900) return 250;
+        if (width < 1024) return 275;
         if (width < 1200) return 300;
-        if (width < 2000) return 400;
-        return 512;
+        if (width < 1500) return 325;
+        return 450;
     }
 
     private void GenerateQr()
     {
-        // // Actualiza enums desde los strings
-        // TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
-        // TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
-
-        // AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
-
-        // if (!AllowedCenters.Contains(TempEyeCenterShape))
-        // {
-        //     TempEyeCenterShape = AllowedCenters[0];
-        //     TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
-        // }
-
-        // Content = TempContent;
-        // ModuleShapeStr = TempModuleShapeStr;
-        // ModuleColor = TempModuleColor;
-        // EyeFrameShapeStr = TempEyeFrameShapeStr;
-        // EyeFrameColor = TempEyeFrameColor;
-        // EyeCenterShapeStr = TempEyeCenterShapeStr;
-        // EyeCenterColor = TempEyeCenterColor;
-        // BgColor = TempBgColor;
-        // ExportFormatStr = TempExportFormatStr;
-        // Size = TempSize;
-        // CorrectionLevelStr = TempCorrectionLevelStr;
-        // LogoBase64 = TempLogoBase64;
-        // StateHasChanged();
         // --- Arma el contenido principal para el QR ---
         switch (SelectedType)
         {
@@ -826,7 +770,6 @@
 
     private void OnCenterShapeChanged()
     {
-        //TempEyeCenterShapeStr = e.Value.ToString();
         TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
     }
 
