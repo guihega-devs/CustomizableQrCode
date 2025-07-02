@@ -1,0 +1,95 @@
+﻿.combo-visual-group {
+    margin-bottom: 1.1rem;
+}
+
+.combo-title {
+    font-weight: bold;
+    margin-bottom: 0.35rem;
+    color: #009FDF;
+    letter-spacing: 0.01em;
+}
+
+.combo-gallery {
+    display: flex;
+    gap: 0.48rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.4rem;
+}
+
+.combo-option {
+    width: 48px;
+    height: 48px;
+    background: #fff;
+    border: 2.5px solid #e2e6ec;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.22s, box-shadow 0.21s, transform 0.14s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 5px #00336612;
+    padding: 0;
+    position: relative;
+    outline: none;
+}
+
+.combo-option:hover,
+.combo-option:focus {
+    border-color: #009FDF;
+    box-shadow: 0 0 0 3px #009FDF22;
+    transform: scale(1.09);
+    z-index: 2;
+}
+
+.combo-option.selected {
+    border-color: #009FDF;
+    background: #F2FCFF;
+    box-shadow: 0 0 0 3px #009FDF33;
+}
+
+.combo-option.selected::after {
+    content: "✔";
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    background: #fff;
+    color: #009FDF;
+    font-size: 1.1rem;
+    border-radius: 50%;
+    padding: 0 4px;
+}
+
+.combo-option svg {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+
+.qr-color {
+    width: 40px;
+    height: 36px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.combo-expand {
+    background: #e9f0fb; /* color sutil para distinguir */
+    color: #2166c9; /* color acorde a tu tema */
+    width: 40px;
+    height: 48px;
+    border: 1px solid #b2c7e9;
+    border-radius: 50%;
+    border: 2px solid #c4d9f7;
+    font-size: 28px;
+    margin-left: 8px;
+    box-shadow: 0 1px 5px #0001;
+    transition: background 0.2s, color 0.2s;
+}
+
+
+.combo-expand:hover {
+    background: #b2c7e9;
+    color: #113d6b;
+}

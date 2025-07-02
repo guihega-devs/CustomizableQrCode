@@ -18,9 +18,11 @@
 
     [Parameter]
     public QrCodeOptions QrOptions { get; set; } = new QrCodeOptions();
-
+    [Parameter]
+    public EventCallback<string> OnSvgGenerated { get; set; }
 
     private string? SvgContent;
+    private string? LastEmittedSvg; // <-- Nuevo: guarda el último emitido
 
     protected override void OnParametersSet()
     {
@@ -55,6 +57,8 @@
             .Build();
 
         SvgContent = qr.AsSvg();
+
+        //OnSvgGenerated.InvokeAsync(SvgContent); // Llama al padre con el SVG listo
     }
 
     // Método genérico para enums con fallback
@@ -91,6 +95,17 @@
             }
         }
         return centro;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Solo dispara el evento si el SVG cambió
+        if (!string.IsNullOrWhiteSpace(SvgContent) && SvgContent != LastEmittedSvg)
+        {
+            LastEmittedSvg = SvgContent;
+            // Ejecuta el callback fuera del render (evita loop)
+            await OnSvgGenerated.InvokeAsync(SvgContent);
+        }
     }
 }
 

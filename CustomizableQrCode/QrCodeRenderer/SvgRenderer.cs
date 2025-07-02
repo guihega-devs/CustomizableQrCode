@@ -338,12 +338,57 @@ namespace CustomizableQrCode.QrCodeRenderer
             }
 
             // Logo central (opcional)
+            //if (!string.IsNullOrWhiteSpace(logoBase64))
+            //{
+            //    double logoSize = size * 0.22;
+            //    double logoX = (size - logoSize) / 2;
+            //    double logoY = (size - logoSize) / 2;
+            //    sb.AppendLine($"<image href='{logoBase64}' x='{logoX}' y='{logoY}' width='{logoSize}' height='{logoSize}' style='pointer-events:none;' />");
+            //}
+            // Logo central (opcional)
+            //            if (!string.IsNullOrWhiteSpace(logoBase64))
+            //            {
+            //                double logoSize = size * 0.22;
+            //                double logoX = (size - logoSize) / 2;
+            //                double logoY = (size - logoSize) / 2;
+            //                //sb.AppendLine($"<image href='{logoBase64}' x='{logoX}' y='{logoY}' width='{logoSize}' height='{logoSize}' style='pointer-events:none;' preserveAspectRatio='xMidYMid meet' />");
+            //                sb.AppendLine($"<image href='{logoBase64}' x='{logoX}' y='{logoY}' width='{logoSize}' height='{logoSize}' style='pointer-events:none;' preserveAspectRatio='xMidYMid meet' />"
+            //);
+            //            }
+
+            // Logo central (opcional)
             if (!string.IsNullOrWhiteSpace(logoBase64))
             {
-                double logoSize = size * 0.22;
-                double logoX = (size - logoSize) / 2;
-                double logoY = (size - logoSize) / 2;
-                sb.AppendLine($"<image href='{logoBase64}' x='{logoX}' y='{logoY}' width='{logoSize}' height='{logoSize}' style='pointer-events:none;' />");
+                var (logoOriginalWidth, logoOriginalHeight) = GetImageDimensionsFromBase64(logoBase64);
+                double aspectRatio = (double)logoOriginalWidth / logoOriginalHeight;
+
+                double maxLogoArea = size * 0.22;
+                double logoWidth, logoHeight;
+
+                if (aspectRatio >= 1)
+                {
+                    logoWidth = maxLogoArea;
+                    logoHeight = maxLogoArea / aspectRatio;
+                }
+                else
+                {
+                    logoHeight = maxLogoArea;
+                    logoWidth = maxLogoArea * aspectRatio;
+                }
+
+                double logoX = (size - logoWidth) / 2.0;
+                double logoY = (size - logoHeight) / 2.0;
+                double margin = maxLogoArea * 0.07;
+                double rectWidth = logoWidth + margin * 2;
+                double rectHeight = logoHeight + margin * 2;
+                double rectX = (size - rectWidth) / 2.0;
+                double rectY = (size - rectHeight) / 2.0;
+
+                sb.AppendLine($"<rect x='{rectX}' y='{rectY}' width='{rectWidth}' height='{rectHeight}' rx='{rectWidth * 0.12}' fill='#fff'/>");
+                sb.AppendLine(
+                    $"<image href='{logoBase64}' x='{logoX}' y='{logoY}' width='{logoWidth}' height='{logoHeight}' " +
+                    $"style='border-radius:12px;pointer-events:none;' preserveAspectRatio='xMidYMid meet' />"
+                );
             }
 
             sb.AppendLine("</svg>");
@@ -1217,5 +1262,16 @@ namespace CustomizableQrCode.QrCodeRenderer
             return sb.ToString();
         }
 
+
+        public static (int width, int height) GetImageDimensionsFromBase64(string base64)
+        {
+            var base64Data = base64.Contains(",") ? base64.Substring(base64.IndexOf(",") + 1) : base64;
+            byte[] imageBytes = Convert.FromBase64String(base64Data);
+            using (var ms = new MemoryStream(imageBytes))
+            using (var img = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(ms))
+            {
+                return (img.Width, img.Height);
+            }
+        }
     }
 }

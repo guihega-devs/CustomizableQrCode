@@ -471,6 +471,43 @@ select.qr-input {
     width: 100%;
 }
 
+.custom-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.custom-tooltip-text {
+    visibility: hidden;
+    width: 300px;
+    background: var(--azul-marino);
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px 14px;
+    position: absolute;
+    z-index: 10;
+    bottom: 140%; /* arriba del ícono */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.25s;
+    font-size: 0.97em;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.21);
+    pointer-events: none;
+}
+
+.custom-tooltip:hover .custom-tooltip-text,
+.custom-tooltip:focus-within .custom-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.custom-tooltip svg {
+    box-shadow: 0 2px 6px rgba(40,140,230,0.10);
+    border-radius: 50%;
+    background: #fff;
+}
 
 @media (max-width: 700px) {
     .qr-config-fields {
@@ -484,12 +521,12 @@ select.qr-input {
         gap: 0.5rem;
     }
 
-        .qr-type-selector .qr-type-btn {
-            width: 38px;
-            height: 38px;
-            min-width: 38px;
-            min-height: 38px;
-        }
+    .qr-type-selector .qr-type-btn {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+    }
 }
 
 
@@ -535,29 +572,29 @@ select.qr-input {
         min-height: 42px;
     }
 
-        .qr-type-btn i {
-            font-size: 1.25rem;
-            color: inherit;
-            pointer-events: none;
-        }
+    .qr-type-btn i {
+        font-size: 1.25rem;
+        color: inherit;
+        pointer-events: none;
+    }
 
-        .qr-type-btn.selected::after {
-            right: 0px;
-            bottom: -5px;
-            font-size: 1.1rem;
-            width: 18px;
-            height: 18px;
-        }
+    .qr-type-btn.selected::after {
+        right: 0px;
+        bottom: -5px;
+        font-size: 1.1rem;
+        width: 18px;
+        height: 18px;
+    }
 
-        .qr-type-btn:hover,
-        .qr-type-btn:focus {
-            transform: scale(1.2);
-        }
+    .qr-type-btn:hover,
+    .qr-type-btn:focus {
+        transform: scale(1.2);
+    }
 
-            .qr-type-btn:hover i,
-            .qr-type-btn:focus-visible i {
-                transform: rotate(var(--btn-angle, 0deg)) rotate(calc(-1 * var(--btn-angle, 0deg))) scale(1.2) rotate(6deg);
-            }
+    .qr-type-btn:hover i,
+    .qr-type-btn:focus-visible i {
+        transform: rotate(var(--btn-angle, 0deg)) rotate(calc(-1 * var(--btn-angle, 0deg))) scale(1.2) rotate(6deg);
+    }
 
     @keyframes radialpulse {
         0% {
