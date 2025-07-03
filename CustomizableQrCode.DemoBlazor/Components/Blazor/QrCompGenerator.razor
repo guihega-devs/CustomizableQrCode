@@ -864,10 +864,13 @@
             return;
         }
 
-        var bytes = Encoding.UTF8.GetBytes(QrSvgString);
-        var base64 = Convert.ToBase64String(bytes);
-        var dataUrl = $"data:image/svg+xml;base64,{base64}";
-        await JS.InvokeVoidAsync("downloadFileFromUrl", "codigoQR.svg", dataUrl);
+        // var bytes = Encoding.UTF8.GetBytes(QrSvgString);
+        // var base64 = Convert.ToBase64String(bytes);
+        // var dataUrl = $"data:image/svg+xml;base64,{base64}";
+        // await JS.InvokeVoidAsync("downloadFileFromUrl", "codigoQR.svg", dataUrl);
+
+        /*Sin librerias externas*/
+        await JS.InvokeVoidAsync("downloadSvgNative", QrSvgString, "codigoQR.svg");
     }
 
 
@@ -876,15 +879,23 @@
     {
         if (string.IsNullOrWhiteSpace(QrSvgString))
             return;
-        await JS.InvokeVoidAsync("downloadSvgAsPng", QrSvgString, "codigoQR.png");
+
+        //await JS.InvokeVoidAsync("downloadSvgAsPng", QrSvgString, "codigoQR.png");
+
+        /*Sin libreria exnterna*/
+        await JS.InvokeVoidAsync("svgStringToPng", QrSvgString, 1024, 1024, "codigoQR.png");
     }
 
     // PDF (usa jsPDF en JS)
     private async Task DownloadPDF()
     {
         // Reutiliza tu lógica para PNG
-        var pngDataUrl = await JS.InvokeAsync<string>("generateQrPngFromSvg", QrSvgString);
-        await JS.InvokeVoidAsync("downloadQrPdf", pngDataUrl, "codigoQR.pdf");
+        //var pngDataUrl = await JS.InvokeAsync<string>("generateQrPngFromSvg", QrSvgString);
+
+        /*sin librerias externas*/
+        int width = 2048;
+        int height = 2048;
+        await JS.InvokeVoidAsync("exportQrAsPdf", QrSvgString, width, height, "codigoQR.pdf");
     }
 
     private void OnShapeChanged(string newValue)
