@@ -66,8 +66,8 @@
 .qr-type-btn.selected::after {
     content: "✔";
     position: absolute;
-    right: 6px;
-    bottom: 6px;
+    right: 0px;
+    bottom: -5px;
     font-size: 1.1rem;
     color: var(--azul-marino);
     background: var(--blanco);
@@ -84,7 +84,7 @@
 }
 
 .qr-type-btn i {
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: inherit;
     pointer-events: none;
 }
@@ -213,32 +213,22 @@
 }
 
 .qr-label {
-    font-weight: bold;
-    margin-bottom: 0.2rem;
-    display: block;
-}
-
-@media (max-width: 800px) {
-    .qr-config-fields {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 550px) {
-    .qr-config-fields {
-        grid-template-columns: 1fr;
-    }
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    letter-spacing: 0.04em;
 }
 
 /**/
 .qr-main-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Dos columnas de igual ancho */
-    /*gap: 2rem;*/
+    display: flex;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
     align-items: flex-start;
     width: 100%;
-    /*max-width: 980px;*/ /* O el valor que decidas */
+    /* max-width: 980px; */
     margin: 0 auto;
+    justify-content: center;
 }
 
 /* Columna izquierda de controles */
@@ -276,12 +266,6 @@
     display: block;
 }
 
-@media (max-width: 850px) {
-    .qr-main-content {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-}
 /**/
 .qr-config-row {
     display: flex;
@@ -329,48 +313,6 @@
     justify-content: center;
 }
 
-@media (max-width: 900px) {
-    .qr-config-row, .qr-actions-row {
-        flex-direction: column;
-        gap: 1.2rem;
-    }
-
-    .qr-actions {
-        flex-direction: row;
-        margin-right: 0;
-        justify-content: center;
-    }
-
-    .qr-preview {
-        margin-top: 1rem;
-        min-width: 0;
-        min-height: 180px;
-    }
-}
-
-/* Responsive para pantallas pequeñas */
-@media (max-width: 850px) {
-    .qr-main-content {
-        grid-template-columns: 1fr;
-        gap: 1.3rem;
-    }
-
-    .qr-preview-col, .qr-form-col {
-        min-width: 0;
-        padding: 0;
-    }
-}
-
-@media (max-width: 2600px) {
-    .qr-label {
-        display: none;
-    }
-    /* Opcional: Ajusta padding/margins si quieres más compacto */
-    .qr-input, .qr-textarea {
-        margin-top: 0.3rem;
-        margin-bottom: 0.6rem;
-    }
-}
 
 
 .qr-config-fields {
@@ -449,6 +391,7 @@ select.qr-input {
     margin-top: 2px;
     font-size: .97rem;
     width: 100%;
+    cursor: pointer;
 }
 
 .qr-logo-preview img {
@@ -495,6 +438,9 @@ select.qr-input {
     font-size: 0.97em;
     box-shadow: 0 4px 18px rgba(0,0,0,0.21);
     pointer-events: none;
+    line-height: 18px;
+    font-weight: bold;
+    font-size: 13px;
 }
 
 .custom-tooltip:hover .custom-tooltip-text,
@@ -509,25 +455,184 @@ select.qr-input {
     background: #fff;
 }
 
-@media (max-width: 700px) {
-    .qr-config-fields {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+.qr-box {
+    position: relative;
+    display: inline-block;
+}
+
+.toast-over-qr {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    background: #1cb07a;
+    color: #fff;
+    padding: 14px 26px;
+    border-radius: 9px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+    font-size: 17px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 50;
+    opacity: 0.97;
+    pointer-events: none;
+    animation: toastFadeInQr 0.35s;
+}
+
+.toast-icon {
+    font-size: 21px;
+    margin-right: 5px;
+}
+
+@keyframes toastFadeInQr {
+    from {
+        opacity: 0;
+        transform: translate(-50%,-100%);
+    }
+
+    to {
+        opacity: 0.97;
+        transform: translate(-50%,-60%);
     }
 }
 
-@media (max-width: 650px) {
-    .qr-type-selector {
-        gap: 0.5rem;
-    }
+.btn-main:hover,
+.btn-download:hover {
+    box-shadow: 0 0 0 2px var(--main), 0 6px 18px #45dba25e;
+}
 
-    .qr-type-selector .qr-type-btn {
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        min-height: 38px;
+.btn-main:active i, .btn-download:active i {
+    transform: scale(1.17) rotate(-10deg);
+    transition: transform 0.13s;
+}
+
+/*.qr-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255,255,255,0.82);
+    border-radius: 10px;
+    padding: 26px 34px 18px 34px;
+    box-shadow: 0 2px 18px #c5e7d2;
+}
+
+.spinner {
+    border: 4px solid #e6eaf3;
+    border-top: 4px solid #1cb07a;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: spin 0.75s linear infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }
+
+.loader-text {
+    color: #1cb07a;
+    font-size: 17px;
+    font-weight: 500;
+    text-shadow: 0 1px 4px #fff;
+}
+*/
+
+.qr-loader-custom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255,255,255,0.92);
+    border-radius: 10px;
+    padding: 28px 36px 20px 36px;
+    box-shadow: 0 2px 20px #c5e7d2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+}
+
+.loader-text {
+    color: #1cb07a;
+    font-size: 17px;
+    font-weight: 600;
+    margin-top: 9px;
+    letter-spacing: 0.2px;
+}
+
+.logo-drop-area {
+    background: #f7fafb;
+    border: 2.5px dashed #b8e2cd;
+    border-radius: 11px;
+    padding: 34px 12px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 110px;
+    cursor: pointer;
+    transition: border-color 0.22s;
+    position: relative;
+}
+
+    .logo-drop-area:hover {
+        border-color: #1cb07a;
+        background: #f3fffa;
+    }
+
+.logo-drop-msg {
+    color: #1cb07a;
+    font-size: 17px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.drop-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.logo-preview {
+    max-width: 74px;
+    max-height: 74px;
+    object-fit: contain;
+    border-radius: 7px;
+    border: 1.5px solid #e3e9f3;
+}
+
+.remove-logo-btn {
+    position: absolute;
+    top: 6px;
+    right: 9px;
+    background: #fff;
+    color: #1cb07a;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 1px 6px #b8e2cd77;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.13s;
+}
+
+    .remove-logo-btn:hover {
+        background: #e6ffef;
+    }
 
 
 /* 4K y Ultra-wide (2560+) */
@@ -742,8 +847,11 @@ select.qr-input {
 /* Tablet 750-999px */
 @media (min-width: 750px) and (max-width: 999px) {
     .qr-main-content {
-        padding: 0;
-        gap: 1rem;
+        /*padding: 0;
+        gap: 1rem;*/
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
     }
 
     .qr-form-col, .qr-preview-col {
@@ -1206,6 +1314,18 @@ select.qr-input {
     }
 }
 
+@media (max-width: 800px) {
+    .qr-config-fields {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 550px) {
+    .qr-config-fields {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 700px) {
     .qr-card {
         max-width: 99vw;
@@ -1219,6 +1339,78 @@ select.qr-input {
 
     .qr-group-double, .qr-group-simple {
         min-width: 0;
+    }
+}
+
+
+@media (max-width: 850px) {
+    .qr-main-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+
+@media (max-width: 900px) {
+    .qr-config-row, .qr-actions-row {
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .qr-actions {
+        flex-direction: row;
+        margin-right: 0;
+        justify-content: center;
+    }
+
+    .qr-preview {
+        margin-top: 1rem;
+        min-width: 0;
+        min-height: 180px;
+    }
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 850px) {
+    .qr-main-content {
+        grid-template-columns: 1fr;
+        gap: 1.3rem;
+    }
+
+    .qr-preview-col, .qr-form-col {
+        min-width: 0;
+        padding: 0;
+    }
+}
+
+@media (max-width: 2600px) {
+    .qr-label {
+        display: none;
+    }
+    /* Opcional: Ajusta padding/margins si quieres más compacto */
+    .qr-input, .qr-textarea {
+        margin-top: 0.3rem;
+        margin-bottom: 0.6rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .qr-config-fields {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 650px) {
+    .qr-type-selector {
+        gap: 0.5rem;
+    }
+
+    .qr-type-selector .qr-type-btn {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
     }
 }
 /*

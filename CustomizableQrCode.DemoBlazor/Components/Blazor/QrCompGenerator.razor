@@ -1,6 +1,7 @@
 ﻿@using System.Threading.Tasks
 @using CustomizableQrCode.Models
 @using System.Text
+@using CustomizableQrCode.QrCodeRenderer
 @using static CustomizableQrCode.Models.QrModels
 @inject IJSRuntime JS
 
@@ -275,9 +276,7 @@
                                                 <circle cx="9" cy="9" r="9" fill="#23a6e8" />
                                                 <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
                                             </svg>
-                                            <span class="custom-tooltip-text">
-                                                Define cuánta información puede recuperar el QR si se daña o ensucia. Q es estándar, H es máximo.
-                                            </span>
+                                            <span class="custom-tooltip-text">Define cuánta información puede recuperar el QR si se daña o ensucia. Q es estándar, H es máximo.</span>
                                         </span>
                                     </label>
                                     <InputSelect @bind-Value="qrOptions.CorrectionLevel" class="qr-input">
@@ -287,7 +286,7 @@
                                         }
                                     </InputSelect>
                                 </div>
-                                <div class="qr-group-simple">
+                                <div class="qr-group-simple" style="display:none">
                                     <label>
                                         Tamaño
                                         <span class="custom-tooltip">
@@ -295,9 +294,7 @@
                                                 <circle cx="9" cy="9" r="9" fill="#23a6e8" />
                                                 <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
                                             </svg>
-                                            <span class="custom-tooltip-text">
-                                                Tamaño en píxeles del QR generado.
-                                            </span>
+                                            <span class="custom-tooltip-text"> Tamaño en píxeles del QR generado. </span>
                                         </span>
                                     </label>
                                     <InputNumber @bind-Value="qrOptions.Size" min="128" max="1024" class="qr-input" />
@@ -310,12 +307,31 @@
                                                 <circle cx="9" cy="9" r="9" fill="#23a6e8" />
                                                 <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
                                             </svg>
-                                            <span class="custom-tooltip-text">
-                                                Ajusta la compresión del QR al exportar. 0 es calidad máxima (mayor peso), 1 es máxima compresión (menor peso).
-                                            </span>
+                                            <span class="custom-tooltip-text">Entre mayor calidad, el código QR se verá más nítido al exportar o imprimir.</span>
                                         </span>
                                     </label>
-                                    <InputNumber @bind-Value="qrOptions.Quality" min="60" max="100" class="qr-input" />
+                                    @* <InputNumber @bind-Value="qrOptions.Quality" min="60" max="100" class="qr-input" /> *@
+                                    <div class="d-flex align-items-center gap-2 my-2">
+                                        <span style="min-width:80px;">Baja calidad</span>
+                                        <input type="range"
+                                               min="0" max="4"
+                                               @bind="Quality"
+                                               class="form-range"
+                                               style="flex:1; accent-color:#0af;" />
+                                        <span style="min-width:80px;">Alta calidad</span>
+                                    </div>
+                                    <div class="text-center fw-bold">
+                                         @(Quality switch
+                                        {
+                                            0 => "Básica",
+                                            1 => "Normal",
+                                            2 => "Buena",
+                                            3 => "Alta",
+                                            4 => "Excelente",
+                                            _ => "Custom"
+                                        })
+                                    </div>
+
                                 </div>
                             </div>
 
@@ -352,20 +368,56 @@
                 </div>
             </div>
             <div class="qr-preview-col">
-                <div class="qr-svg-container">
-                <CustomQrCode QrOptions="qrOptions" OnSvgGenerated="GuardarQrSvgString" />
+                <div class="qr-svg-container qr-box">
+                    @* @if (isLoading)
+                    {
+                        <div class="qr-loader">
+                            <div class="spinner"></div>
+                            <span class="loader-text">Generando QR…</span>
+                        </div>
+                    } *@
+                    @if (isLoading)
+                    {
+                        <div class="qr-loader-custom">
+                            <svg width="48" height="48" viewBox="0 0 40 40">
+                                <rect x="2" y="2" width="12" height="12" rx="3" fill="#1cb07a">
+                                    <animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite" />
+                                </rect>
+                                <rect x="26" y="2" width="12" height="12" rx="3" fill="#1cb07a" opacity="0.7">
+                                    <animate attributeName="opacity" values="0;1;0" begin="0.2s" dur="1s" repeatCount="indefinite" />
+                                </rect>
+                                <rect x="2" y="26" width="12" height="12" rx="3" fill="#1cb07a" opacity="0.5">
+                                    <animate attributeName="opacity" values="0;1;0" begin="0.4s" dur="1s" repeatCount="indefinite" />
+                                </rect>
+                                <rect x="26" y="26" width="12" height="12" rx="3" fill="#1cb07a" opacity="0.9">
+                                    <animate attributeName="opacity" values="0;1;0" begin="0.6s" dur="1s" repeatCount="indefinite" />
+                                </rect>
+                            </svg>
+                            <div class="loader-text">Generando QR…</div>
+                        </div>
+                    }
+                    @if (showToast)
+                    {
+                        <div class="toast-over-qr">
+                            <span class="toast-icon">✔️</span> ¡QR generado exitosamente!
+                        </div>
+                    }
+                    <CustomQrCode QrOptions="qrOptions" OnSvgGenerated="GuardarQrSvgString" />
+                    
                 </div>
                 <div class="qr-actions">
-                    <button class="btn btn-success mt-3" @onclick="GenerateQr">Generar QR</button>
                     @* <button class="btn btn-primary mt-3 ms-2" @onclick="DownloadSVG">Descargar SVG</button> *@
-                    <div class="qr-actions d-flex flex-wrap gap-2 mt-3">
-                        <button class="btn btn-primary" @onclick="DownloadSVG" title="Descargar SVG">
+                    <div class="qr-actions d-flex flex-wrap gap-2">
+                        <button class="btn btn-main" @onclick="GenerateQr" title="Generar">
+                            <i class="fa fa-qrcode" aria-hidden="true"></i>Generar
+                        </button>
+                        <button class="btn btn-download" @onclick="DownloadSVG" title="Descargar SVG">
                             <i class="fas fa-file-code"></i> SVG
                         </button>
-                        <button class="btn btn-success" @onclick="DownloadPNG" title="Descargar PNG">
+                        <button class="btn btn-download" @onclick="DownloadPNG" title="Descargar PNG">
                             <i class="fas fa-file-image"></i> PNG
                         </button>
-                    <button class="btn btn-secondary" @onclick="DownloadPDF" title="Descargar PDF">
+                        <button class="btn btn-download" @onclick="DownloadPDF" title="Descargar PDF">
                             <i class="fas fa-file-pdf"></i> PDF
                         </button>
                     </div>
@@ -436,7 +488,7 @@
 
     // --- Campos para cada tipo ---
     // LINK
-    private string LinkUrl { get; set; }
+    private string LinkUrl { get; set; } = "https://midominio.com";
 
     // TEXT
     private string TextContent { get; set; }
@@ -557,34 +609,37 @@
 
     // Variables para mostrar QR
     public string Content { get; set; } = "https://midominio.com";
-    public string ModuleShapeStr { get; set; } = "Square";
-    public string ModuleColor { get; set; } = "#4a90e2";
-    public string EyeFrameShapeStr { get; set; } = "Square";
-    public string EyeFrameColor { get; set; } = "#000000";
-    public string EyeCenterShapeStr { get; set; } = "Square";
-    public string EyeCenterColor { get; set; } = "#000000";
-    public string BgColor { get; set; } = "#ffffff";
-    public string ExportFormatStr { get; set; } = "Svg";
+    // public string ModuleShapeStr { get; set; } = "Square";
+    // public string ModuleColor { get; set; } = "#4a90e2";
+    // public string EyeFrameShapeStr { get; set; } = "Square";
+    // public string EyeFrameColor { get; set; } = "#000000";
+    // public string EyeCenterShapeStr { get; set; } = "Square";
+    // public string EyeCenterColor { get; set; } = "#000000";
+    //public string BgColor { get; set; } = "#f7f7f7";
+    //public string ExportFormatStr { get; set; } = "Svg";
     public int Size => CalcularTamañoPorVentana(windowWidth);
+    private int Quality { get; set; } = 2; // Valor inicial por defecto
 
-    public string CorrectionLevelStr { get; set; } = "Q";
-    public string LogoBase64 { get; set; }
+    // private string BackgroundGradient { get; set; }
+
+    // public string CorrectionLevelStr { get; set; } = "Q";
+    // public string LogoBase64 { get; set; }
 
     private int windowWidth; // Default inicial
 
     // Variables temporales para el formulario
-    public string TempContent { get; set; }
-    public string TempModuleShapeStr { get; set; }
-    public string TempModuleColor { get; set; }
+    // public string TempContent { get; set; }
+    // public string TempModuleShapeStr { get; set; }
+    // public string TempModuleColor { get; set; }
 
-    public string TempEyeFrameColor { get; set; }
+    // public string TempEyeFrameColor { get; set; }
 
-    public string TempEyeCenterColor { get; set; }
-    public string TempBgColor { get; set; }
-    public string TempExportFormatStr { get; set; }
-    public int TempSize { get; set; }
-    public string TempCorrectionLevelStr { get; set; }
-    public string TempLogoBase64 { get; set; }
+    // public string TempEyeCenterColor { get; set; }
+    // public string TempBgColor { get; set; }
+    // public string TempExportFormatStr { get; set; }
+    // public int TempSize { get; set; }
+    // public string TempCorrectionLevelStr { get; set; }
+    // public string TempLogoBase64 { get; set; }
 
     // Campos privados de backing
     private string tempEyeFrameShapeStr = "Square";
@@ -596,7 +651,6 @@
     public List<EyeCenterShape> AllowedCenters { get; set; } = new List<EyeCenterShape>();
 
     private string tipoQrSeleccionado = "Link";
-
 
     public string TempEyeFrameShapeStr
     {
@@ -641,33 +695,39 @@
         }
     }
 
+    private bool showToast = false;
+    private System.Threading.Timer? toastTimer;
+
+    private bool isLoading = false;
+
+
     protected override void OnInitialized()
     {
         QrContent = InitialContent;
 
         // Inicializa enums desde los strings
-        TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
-        TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
+        // TempEyeFrameShape = Enum.Parse<EyeFrameShape>(TempEyeFrameShapeStr);
+        // TempEyeCenterShape = Enum.Parse<EyeCenterShape>(TempEyeCenterShapeStr);
 
-        AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
-        if (!AllowedCenters.Contains(TempEyeCenterShape))
-        {
-            TempEyeCenterShape = AllowedCenters[0];
-            TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
-        }
+        // AllowedCenters = GetAllowedCenters(TempEyeFrameShape);
+        // if (!AllowedCenters.Contains(TempEyeCenterShape))
+        // {
+        //     TempEyeCenterShape = AllowedCenters[0];
+        //     TempEyeCenterShapeStr = TempEyeCenterShape.ToString();
+        // }
 
-        TempContent = Content;
-        TempModuleShapeStr = ModuleShapeStr;
-        TempModuleColor = ModuleColor;
-        TempEyeFrameShapeStr = EyeFrameShapeStr;
-        TempEyeFrameColor = EyeFrameColor;
-        TempEyeCenterShapeStr = EyeCenterShapeStr;
-        TempEyeCenterColor = EyeCenterColor;
-        TempBgColor = BgColor;
-        TempExportFormatStr = ExportFormatStr;
-        TempSize = Size;
-        TempCorrectionLevelStr = CorrectionLevelStr;
-        TempLogoBase64 = LogoBase64;
+        // TempContent = Content;
+        // TempModuleShapeStr = ModuleShapeStr;
+        // TempModuleColor = ModuleColor;
+        // TempEyeFrameShapeStr = EyeFrameShapeStr;
+        // TempEyeFrameColor = EyeFrameColor;
+        // TempEyeCenterShapeStr = EyeCenterShapeStr;
+        // TempEyeCenterColor = EyeCenterColor;
+        // TempBgColor = BgColor;
+        // TempExportFormatStr = ExportFormatStr;
+        // TempSize = Size;
+        // TempCorrectionLevelStr = CorrectionLevelStr;
+        // TempLogoBase64 = LogoBase64;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -682,86 +742,105 @@
 
     private int CalcularTamañoPorVentana(int width)
     {
-        if (width < 500) return 200;
-        if (width < 700) return 225;
-        if (width < 900) return 250;
-        if (width < 1024) return 275;
-        if (width < 1200) return 300;
-        if (width < 1500) return 325;
-        return 450;
+        if (width < 350) return 250;
+        if (width < 500) return 275;
+        if (width < 700) return 300;
+        if (width < 900) return 400;
+        if (width < 1024) return 300;
+        if (width < 1200) return 350;
+        if (width < 1500) return 425;
+        if (width < 2000) return 500;
+        return 550;
     }
 
-    private void GenerateQr()
+    private async Task GenerateQr()
     {
-        // --- Arma el contenido principal para el QR ---
-        switch (SelectedType)
-        {
-            case QrContentType.Link:
-                qrOptions.Content = LinkUrl;
-                break;
-            case QrContentType.Text:
-                qrOptions.Content = TextContent;
-                break;
-            case QrContentType.Email:
-                qrOptions.Content = $"mailto:{EmailTo}?subject={Uri.EscapeDataString(EmailSubject)}&body={Uri.EscapeDataString(EmailBody)}";
-                break;
-            case QrContentType.Call:
-                qrOptions.Content = $"tel:{Phone}";
-                break;
-            case QrContentType.SMS:
-                qrOptions.Content = $"sms:{SmsPhone}?body={Uri.EscapeDataString(SmsMessage)}";
-                break;
-            case QrContentType.VCard:
-                qrOptions.Content = BuildVCard();
-                break;
-            case QrContentType.WhatsApp:
-                var msg = string.IsNullOrWhiteSpace(WhatsAppMessage) ? "" : $"?text={Uri.EscapeDataString(WhatsAppMessage)}";
-                qrOptions.Content = $"https://wa.me/{WhatsAppPhone}{msg}";
-                break;
-            case QrContentType.WiFi:
-                qrOptions.Content = $"WIFI:T:{WiFiEncryption};S:{WiFiSSID};P:{WiFiPassword};;";
-                break;
-            case QrContentType.PDF:
-                qrOptions.Content = PdfUrl;
-                break;
-            case QrContentType.App:
-                qrOptions.Content = AppUrl;
-                break;
-            case QrContentType.Images:
-                qrOptions.Content = ImageUrl;
-                break;
-            case QrContentType.Video:
-                qrOptions.Content = VideoUrl;
-                break;
-            case QrContentType.SocialMedia:
-                qrOptions.Content = SocialUrl;
-                break;
-            case QrContentType.Event:
-                qrOptions.Content = BuildEvent();
-                break;
-            case QrContentType.Barcode2D:
-                qrOptions.Content = Barcode2DContent;
-                break;
-            default:
-                qrOptions.Content = "";
-                break;
-        }
-
-        // --- Aquí puedes actualizar cualquier otro campo de qrOptions si fuera necesario ---
-        qrOptions.ModuleShape = Enum.Parse<ModuleShape>(qrOptions.ModuleShape.ToString());
-        qrOptions.ModuleColor = qrOptions.ModuleColor;
-        qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(qrOptions.EyeFrameShape.ToString());
-        qrOptions.EyeFrameColor = qrOptions.EyeFrameColor;
-        qrOptions.EyeCenterShape = Enum.Parse<EyeCenterShape>(qrOptions.EyeCenterShape.ToString());
-        qrOptions.EyeCenterColor = qrOptions.EyeCenterColor;
-        qrOptions.BgColor = qrOptions.BgColor;
-        qrOptions.CorrectionLevel = qrOptions.CorrectionLevel;
-        qrOptions.Size = qrOptions.Size;
-        qrOptions.Quality = qrOptions.Quality;
-        qrOptions.LogoBase64 = qrOptions.LogoBase64;
-
-        // Esto fuerza la actualización del QR generado
+        isLoading = true;
         StateHasChanged();
+
+        try
+        {
+            // --- Arma el contenido principal para el QR ---
+            switch (SelectedType)
+            {
+                case QrContentType.Link:
+                    qrOptions.Content = LinkUrl;
+                    break;
+                case QrContentType.Text:
+                    qrOptions.Content = TextContent;
+                    break;
+                case QrContentType.Email:
+                    qrOptions.Content = $"mailto:{EmailTo}?subject={Uri.EscapeDataString(EmailSubject)}&body={Uri.EscapeDataString(EmailBody)}";
+                    break;
+                case QrContentType.Call:
+                    qrOptions.Content = $"tel:{Phone}";
+                    break;
+                case QrContentType.SMS:
+                    qrOptions.Content = $"sms:{SmsPhone}?body={Uri.EscapeDataString(SmsMessage)}";
+                    break;
+                case QrContentType.VCard:
+                    qrOptions.Content = BuildVCard();
+                    break;
+                case QrContentType.WhatsApp:
+                    var msg = string.IsNullOrWhiteSpace(WhatsAppMessage) ? "" : $"?text={Uri.EscapeDataString(WhatsAppMessage)}";
+                    qrOptions.Content = $"https://wa.me/{WhatsAppPhone}{msg}";
+                    break;
+                case QrContentType.WiFi:
+                    qrOptions.Content = $"WIFI:T:{WiFiEncryption};S:{WiFiSSID};P:{WiFiPassword};;";
+                    break;
+                case QrContentType.PDF:
+                    qrOptions.Content = PdfUrl;
+                    break;
+                case QrContentType.App:
+                    qrOptions.Content = AppUrl;
+                    break;
+                case QrContentType.Images:
+                    qrOptions.Content = ImageUrl;
+                    break;
+                case QrContentType.Video:
+                    qrOptions.Content = VideoUrl;
+                    break;
+                case QrContentType.SocialMedia:
+                    qrOptions.Content = SocialUrl;
+                    break;
+                case QrContentType.Event:
+                    qrOptions.Content = BuildEvent();
+                    break;
+                case QrContentType.Barcode2D:
+                    qrOptions.Content = Barcode2DContent;
+                    break;
+                default:
+                    qrOptions.Content = Content;
+                    break;
+            }
+
+            // --- Aquí puedes actualizar cualquier otro campo de qrOptions si fuera necesario ---
+            qrOptions.ModuleShape = Enum.Parse<ModuleShape>(qrOptions.ModuleShape.ToString());
+            qrOptions.ModuleColor = qrOptions.ModuleColor;
+            qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(qrOptions.EyeFrameShape.ToString());
+            qrOptions.EyeFrameColor = qrOptions.EyeFrameColor;
+            qrOptions.EyeCenterShape = Enum.Parse<EyeCenterShape>(qrOptions.EyeCenterShape.ToString());
+            qrOptions.EyeCenterColor = qrOptions.EyeCenterColor;
+            qrOptions.BgColor = qrOptions.BgColor;
+            qrOptions.CorrectionLevel = qrOptions.CorrectionLevel;
+            qrOptions.Size = qrOptions.Size;
+            qrOptions.Quality = qrOptions.Quality;
+            qrOptions.LogoBase64 = qrOptions.LogoBase64;
+
+            // Esto fuerza la actualización del QR generado
+            //StateHasChanged();
+            await Task.Delay(1500); // Simulación, reemplaza por tu lógica real
+            ShowToast();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 
     public async Task OnLogoChanged(InputFileChangeEventArgs e)
@@ -864,11 +943,6 @@
             return;
         }
 
-        // var bytes = Encoding.UTF8.GetBytes(QrSvgString);
-        // var base64 = Convert.ToBase64String(bytes);
-        // var dataUrl = $"data:image/svg+xml;base64,{base64}";
-        // await JS.InvokeVoidAsync("downloadFileFromUrl", "codigoQR.svg", dataUrl);
-
         /*Sin librerias externas*/
         await JS.InvokeVoidAsync("downloadSvgNative", QrSvgString, "codigoQR.svg");
     }
@@ -880,22 +954,17 @@
         if (string.IsNullOrWhiteSpace(QrSvgString))
             return;
 
-        //await JS.InvokeVoidAsync("downloadSvgAsPng", QrSvgString, "codigoQR.png");
-
         /*Sin libreria exnterna*/
-        await JS.InvokeVoidAsync("svgStringToPng", QrSvgString, 1024, 1024, "codigoQR.png");
+        int size = GetQrSize();
+        await JS.InvokeVoidAsync("svgStringToPng", QrSvgString, size, size, "codigoQR.png");
     }
 
     // PDF (usa jsPDF en JS)
     private async Task DownloadPDF()
     {
-        // Reutiliza tu lógica para PNG
-        //var pngDataUrl = await JS.InvokeAsync<string>("generateQrPngFromSvg", QrSvgString);
-
         /*sin librerias externas*/
-        int width = 2048;
-        int height = 2048;
-        await JS.InvokeVoidAsync("exportQrAsPdf", QrSvgString, width, height, "codigoQR.pdf");
+        int size = GetQrSize();
+        await JS.InvokeVoidAsync("exportQrAsPdf", QrSvgString, size, size, "codigoQR.pdf");
     }
 
     private void OnShapeChanged(string newValue)
@@ -927,4 +996,39 @@
     {
         qrOptions.EyeCenterColor = newValue;
     }
+
+    // Convierte el nivel de calidad a tamaño o dpi sugerido
+    private int GetQrSize()
+    {
+        // Puedes definir diferentes resoluciones para cada calidad
+        return Quality switch
+        {
+            0 => 300,  // Básica
+            1 => 450,  // Normal
+            2 => 750,  // Buena
+            3 => 1100, // Alta
+            4 => 2048, // Excelente
+            _ => 450,
+        };
+    }
+
+    private static TEnum TryParseEnum<TEnum>(string value, TEnum defaultValue) where TEnum : struct
+    {
+        if (!string.IsNullOrEmpty(value) && Enum.TryParse(value, true, out TEnum result))
+            return result;
+        return defaultValue;
+    }
+
+    private void ShowToast()
+    {
+        showToast = true;
+        toastTimer?.Dispose();
+        toastTimer = new System.Threading.Timer(_ =>
+        {
+            showToast = false;
+            InvokeAsync(StateHasChanged);
+        }, null, 2000, System.Threading.Timeout.Infinite);
+        StateHasChanged();
+    }
+
 }

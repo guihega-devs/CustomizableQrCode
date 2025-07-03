@@ -49,7 +49,7 @@
             .WithEyeFrameColor(QrOptions.EyeFrameColor ?? "#000000")
             .WithEyeCenterShape(eyeCenterShape)
             .WithEyeCenterColor(QrOptions.EyeCenterColor ?? "#000000")
-            .WithBackgroundGradient(BackgroundGradient ?? "#fff")
+            .WithBackgroundGradient(QrOptions.BgColor ?? "#f7f7f7")
             .WithExportFormat(exportFormat)
             .WithCorrectionLevel(correctionLevel)
             .WithSize(QrOptions.Size > 0 ? QrOptions.Size : 512)

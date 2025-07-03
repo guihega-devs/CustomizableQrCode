@@ -338,25 +338,6 @@ namespace CustomizableQrCode.QrCodeRenderer
             }
 
             // Logo central (opcional)
-            //if (!string.IsNullOrWhiteSpace(logoBase64))
-            //{
-            //    double logoSize = size * 0.22;
-            //    double logoX = (size - logoSize) / 2;
-            //    double logoY = (size - logoSize) / 2;
-            //    sb.AppendLine($"<image href='{logoBase64}' x='{logoX}' y='{logoY}' width='{logoSize}' height='{logoSize}' style='pointer-events:none;' />");
-            //}
-            // Logo central (opcional)
-            //            if (!string.IsNullOrWhiteSpace(logoBase64))
-            //            {
-            //                double logoSize = size * 0.22;
-            //                double logoX = (size - logoSize) / 2;
-            //                double logoY = (size - logoSize) / 2;
-            //                //sb.AppendLine($"<image href='{logoBase64}' x='{logoX}' y='{logoY}' width='{logoSize}' height='{logoSize}' style='pointer-events:none;' preserveAspectRatio='xMidYMid meet' />");
-            //                sb.AppendLine($"<image href='{logoBase64}' x='{logoX}' y='{logoY}' width='{logoSize}' height='{logoSize}' style='pointer-events:none;' preserveAspectRatio='xMidYMid meet' />"
-            //);
-            //            }
-
-            // Logo central (opcional)
             if (!string.IsNullOrWhiteSpace(logoBase64))
             {
                 var (logoOriginalWidth, logoOriginalHeight) = GetImageDimensionsFromBase64(logoBase64);

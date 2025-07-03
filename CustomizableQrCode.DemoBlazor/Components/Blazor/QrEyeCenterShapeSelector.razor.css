@@ -3,20 +3,24 @@
 }
 
 .combo-title {
-    font-weight: bold;
+    font-weight: 700;
     margin-bottom: 0.35rem;
-    color: #009FDF;
+    /*color: #009FDF;*/
     letter-spacing: 0.01em;
+    display: block;
+    font-size: 18px;
+    letter-spacing: 0.2px;
 }
 
 .combo-gallery {
     display: flex;
-    gap: 0.48rem;
+    gap: 8px;
     flex-wrap: wrap;
     margin-bottom: 0.4rem;
+    align-items: center;
 }
 
-.combo-option {
+/*.combo-option {
     width: 48px;
     height: 48px;
     background: #fff;
@@ -31,21 +35,47 @@
     padding: 0;
     position: relative;
     outline: none;
+}*/
+
+.combo-option,
+.combo-expand {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1.5px solid #e3e9f3;
+    background: #fff;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.combo-option:hover,
+.combo-expand:hover {
+    border-color: #6b90e6;
+    box-shadow: 0 2px 10px #dde8fa;
+}
+
+.combo-option.selected {
+    border-color: #3366ff;
+    background: #f0f5ff;
+}
+
+/*
 .combo-option:hover,
 .combo-option:focus {
     border-color: #009FDF;
     box-shadow: 0 0 0 3px #009FDF22;
     transform: scale(1.09);
     z-index: 2;
-}
+}*/
 
-.combo-option.selected {
+/*.combo-option.selected {
     border-color: #009FDF;
     background: #F2FCFF;
     box-shadow: 0 0 0 3px #009FDF33;
-}
+}*/
 
 .combo-option.selected::after {
     content: "✔";
@@ -74,11 +104,11 @@
     cursor: pointer;
 }
 
-.combo-expand {
-    background: #e9f0fb; /* color sutil para distinguir */
-    color: #2166c9; /* color acorde a tu tema */
-    width: 40px;
-    height: 48px;
+/*.combo-expand {
+    background: #e9f0fb;*/ /* color sutil para distinguir */
+    /*color: #2166c9;*/ /* color acorde a tu tema */
+    /*width: 40px;
+    height: 45px;
     border: 1px solid #b2c7e9;
     border-radius: 50%;
     border: 2px solid #c4d9f7;
@@ -86,10 +116,10 @@
     margin-left: 8px;
     box-shadow: 0 1px 5px #0001;
     transition: background 0.2s, color 0.2s;
-}
+}*/
 
 
-.combo-expand:hover {
+/*.combo-expand:hover {
     background: #b2c7e9;
     color: #113d6b;
-}
+}*/

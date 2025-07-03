@@ -12,7 +12,7 @@ namespace CustomizableQrCode
         private QrCodeOptions options = new QrCodeOptions();
 
         // Parámetros que NO están en QrCodeOptions (y sí usa el renderer)
-        private string _backgroundGradient = "#fff";
+        private string _backgroundGradient = "#f7f7f7";
         private string _logoBase64;
         private QrExportFormat _exportFormat = QrExportFormat.Svg;
         private int _quality ;
