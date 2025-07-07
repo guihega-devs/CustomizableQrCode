@@ -58,7 +58,7 @@ namespace CustomizableQrCode.Models
         public EyeShape EyeShape { get; set; } = EyeShape.Square; // <= agrega esto
         public string EyeColor { get; set; } = "#000000";          // <= agrega esto
 
-        public string ModuleColor { get; set; } = "#4a90e2";
+        public string ModuleColor { get; set; } = "#4B93F2";
         public string BgColor { get; set; } = "#f7f7f7";
 
         public QrCorrectionLevel CorrectionLevel { get; set; } = QrCorrectionLevel.Q;

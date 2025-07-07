@@ -15,9 +15,22 @@
         }
         @if (OtherShapes.Any())
         {
-            <button type="button" class="combo-expand more-btn" @onclick="ToggleShapes" aria-label="Mostrar más">
-                @(showAllShapes ? "-" : "+")
-            </button>
+            <div class="combo-expand-container">
+                <button type="button"
+                        class="combo-expand more-btn"
+                        @onclick="ToggleShapes"
+                        @onmouseover="() => ShowTooltip = true"
+                        @onmouseout="() => ShowTooltip = false"
+                        aria-label="@(showAllShapes ? "Ver menos opciones" : "Ver más opciones")">
+                    @(showAllShapes ? "-" : "+")
+                </button>
+                @if (ShowTooltip)
+                {
+                    <div class="tooltip-combo-expand">
+                        @(showAllShapes ? "Ver menos opciones" : "Ver más opciones de formas")
+                    </div>
+                }
+            </div>
         }
         <input type="color" value="SelectedColor"  class="qr-color" @oninput="OnColorChanged" />
         @* @if (BajoContraste)
@@ -43,6 +56,7 @@
     private List<ShapeOption> MainShapes => Shapes.Take(maxVisible).ToList();
     private List<ShapeOption> OtherShapes => Shapes.Skip(maxVisible).ToList();
 
+    private bool ShowTooltip { get; set; }
     private void ToggleShapes() => showAllShapes = !showAllShapes;
 
     // Lógica: alerta si el contraste es bajo
@@ -50,6 +64,9 @@
 
     // Se llama en cada cambio de color para actualizar la alerta
     private void OnColorChange(ChangeEventArgs e) => StateHasChanged();
+
+    
+    //private void ToggleShapes() => showAllShapes = !showAllShapes;
 
     public class ShapeOption
     {

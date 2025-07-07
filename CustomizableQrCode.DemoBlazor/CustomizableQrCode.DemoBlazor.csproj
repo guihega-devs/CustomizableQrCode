@@ -7,14 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Components\Blazor\QrTypeRadialSelector.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Components\Blazor\QrTypeRadialSelector.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
   </ItemGroup>
 

@@ -1,11 +1,12 @@
 ﻿.combo-visual-group {
     margin-bottom: 1.1rem;
+    position: relative;
+    display: inline-block;
 }
 
 .combo-title {
     font-weight: 700;
     margin-bottom: 0.35rem;
-    /*color: #009FDF;*/
     letter-spacing: 0.01em;
     display: block;
     font-size: 18px;
@@ -20,30 +21,13 @@
     align-items: center;
 }
 
-/*.combo-option {
-    width: 48px;
-    height: 48px;
-    background: #fff;
-    border: 2.5px solid #e2e6ec;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: border-color 0.22s, box-shadow 0.21s, transform 0.14s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 1px 5px #00336612;
-    padding: 0;
-    position: relative;
-    outline: none;
-}*/
-
 .combo-option,
 .combo-expand {
     width: 44px;
     height: 44px;
     border-radius: 12px;
     border: 1.5px solid #e3e9f3;
-    background: #fff;
+    background: var(--color-fondo-claro);
     transition: box-shadow 0.2s, border-color 0.2s;
     cursor: pointer;
     display: flex;
@@ -62,27 +46,12 @@
     background: #f0f5ff;
 }
 
-/*
-.combo-option:hover,
-.combo-option:focus {
-    border-color: #009FDF;
-    box-shadow: 0 0 0 3px #009FDF22;
-    transform: scale(1.09);
-    z-index: 2;
-}*/
-
-/*.combo-option.selected {
-    border-color: #009FDF;
-    background: #F2FCFF;
-    box-shadow: 0 0 0 3px #009FDF33;
-}*/
-
 .combo-option.selected::after {
     content: "✔";
     position: absolute;
     right: 5px;
     bottom: 5px;
-    background: #fff;
+    background: var(color-fondo-claro);
     color: #009FDF;
     font-size: 1.1rem;
     border-radius: 50%;
@@ -104,22 +73,73 @@
     cursor: pointer;
 }
 
-/*.combo-expand {
-    background: #e9f0fb;*/ /* color sutil para distinguir */
-    /*color: #2166c9;*/ /* color acorde a tu tema */
-    /*width: 40px;
-    height: 45px;
-    border: 1px solid #b2c7e9;
-    border-radius: 50%;
-    border: 2px solid #c4d9f7;
-    font-size: 28px;
-    margin-left: 8px;
-    box-shadow: 0 1px 5px #0001;
-    transition: background 0.2s, color 0.2s;
-}*/
+.tooltip-combo-expand {
+    position: absolute;
+    background: var(--color-secundario);
+    color: var(--texto-primario);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    z-index: 999;
+    /*bottom: 39%;
+    left: 25%;*/ /* ajustar según layout */
+    left: 100%; /* ajustar según layout */
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
 
+.combo-expand-container {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+}
 
-/*.combo-expand:hover {
-    background: #b2c7e9;
-    color: #113d6b;
-}*/
+.tooltip-combo-expand {
+    position: absolute;
+    left: 50%;
+    top: -45px; /* Ajusta si quieres el tooltip arriba del botón */
+    transform: translateX(-50%);
+    background: #222;
+    color: var(--texto-primario);
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    opacity: 0.97;
+    pointer-events: none; /* ¡importante! para no bloquear el mouse */
+    animation: fadeInCombo 0.16s;
+}
+
+/* Animación suave de aparición */
+@keyframes fadeInCombo {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+
+    to {
+        opacity: 0.95;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@media (min-width: 1350px) and (max-width: 1699px) {
+    .qr-input, .qr-select, .qr-textarea {
+        padding: 10px 10px;
+        margin-bottom: 6px;
+    }
+
+    .combo-visual-group {
+        margin-bottom: .5rem;
+    }
+}
+
+/* 1000-1200px */
+@media (min-width: 1000px) and (max-width: 1199px) {
+    .combo-visual-group {
+        margin-bottom: .5rem;
+    }
+}
