@@ -1,0 +1,141 @@
+﻿@using CustomizableQrCode.Models
+@using static CustomizableQrCode.Models.QrModels
+
+<div class="combo-visual-group">
+    <label class="combo-title">Forma del módulo</label>
+    <div class="combo-gallery">
+        @foreach (var shape in (showAllShapes ? Shapes : MainShapes))
+        {
+            <button type="button"
+                    class="combo-option @(SelectedShape == shape.Id ? "selected" : "")"
+                    @onclick="() => SelectShape(shape.Id)"
+                    title="@shape.Name">
+                <img src="@shape.Img" alt="@shape.Name" />
+            </button>
+        }
+        @if (OtherShapes.Any())
+        {
+            <div class="combo-expand-container">
+                <button type="button"
+                        class="combo-expand more-btn"
+                        @onclick="ToggleShapes"
+                        @onmouseover="() => ShowTooltip = true"
+                        @onmouseout="() => ShowTooltip = false"
+                        aria-label="@(showAllShapes ? "Ver menos opciones" : "Ver más opciones")">
+                    @(showAllShapes ? "-" : "+")
+                </button>
+                @if (ShowTooltip)
+                {
+                    <div class="tooltip-combo-expand">
+                        @(showAllShapes ? "Ver menos opciones" : "Ver más opciones de formas")
+                    </div>
+                }
+            </div>
+        }
+        <input type="color" value="SelectedColor"  class="qr-color" @oninput="OnColorChanged" />
+        @* @if (BajoContraste)
+        {
+            <div style="color:#fff; background:#D8000C; padding:10px 16px; border-radius:8px; margin-top:14px; font-weight:bold; max-width:380px;box-shadow:0 2px 10px #a63d3d42;">
+                ⚠️ Bajo contraste: El QR podría no leerse bien. Prueba con colores más contrastantes.
+            </div>
+        } *@
+    </div>
+</div>
+
+@code {
+    [Parameter] public string SelectedShape { get; set; }
+    [Parameter] public string SelectedColor { get; set; }
+    [Parameter] public EventCallback<string> SelectedShapeChanged { get; set; }
+    [Parameter] public EventCallback<string> SelectedColorChanged { get; set; }
+
+    QrCodeOptions qrOptions = new QrCodeOptions();
+
+    private bool showAllShapes = false;
+    private int maxVisible = 4; // Cuántas formas principales mostrar
+
+    private List<ShapeOption> MainShapes => Shapes.Take(maxVisible).ToList();
+    private List<ShapeOption> OtherShapes => Shapes.Skip(maxVisible).ToList();
+
+    private bool ShowTooltip { get; set; }
+    private void ToggleShapes() => showAllShapes = !showAllShapes;
+
+    // Lógica: alerta si el contraste es bajo
+    private bool BajoContraste => Contraste("#FFFFFF", SelectedColor) < 4.5;
+
+    // Se llama en cada cambio de color para actualizar la alerta
+    private void OnColorChange(ChangeEventArgs e) => StateHasChanged();
+
+    
+    //private void ToggleShapes() => showAllShapes = !showAllShapes;
+
+    public class ShapeOption
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Img { get; set; } // puede ser path, base64 o SVG inline
+    }
+
+    private List<ShapeOption> Shapes = new()
+    {
+        new ShapeOption { Id = "Square", Name = "Cuadrado", Img = "img/formodulo/square.svg" },
+        new ShapeOption { Id = "Circle", Name = "Puntos", Img = "img/formodulo/circle.svg" },
+        new ShapeOption { Id = "Hexagon", Name = "Redondeado", Img = "img/formodulo/hexagon.svg" },
+        // ...agrega tus formas aquí
+        //Square, Circle, Hexagon
+    };
+
+    private async Task SelectShape(string id)
+    {
+        SelectedShape = id;
+        await SelectedShapeChanged.InvokeAsync(id);
+    }
+
+    private async Task OnColorChanged(ChangeEventArgs e)
+    {
+        SelectedColor = e.Value?.ToString();
+        await SelectedColorChanged.InvokeAsync(SelectedColor);
+        StateHasChanged();
+    }
+
+    // === FUNCIONES UTILITARIAS DE CONTRASTE WCAG ===
+
+    // Hex a RGB
+    private int[] HexToRgb(string hex)
+    {
+        if (string.IsNullOrWhiteSpace(hex))
+            return new[] { 255, 255, 255 }; // Retorna blanco si vacío o null
+
+        hex = hex.Replace("#", "");
+        if (hex.Length == 3)
+            hex = string.Concat(hex.Select(c => $"{c}{c}"));
+
+        // Si sigue mal, retorna blanco (o puedes lanzar excepción amigable)
+        if (hex.Length != 6 || !int.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out _))
+            return new[] { 255, 255, 255 };
+
+        int r = Convert.ToInt32(hex.Substring(0, 2), 16);
+        int g = Convert.ToInt32(hex.Substring(2, 2), 16);
+        int b = Convert.ToInt32(hex.Substring(4, 2), 16);
+        return new[] { r, g, b };
+    }
+
+    // Luminancia relativa (WCAG)
+    private double Luminancia(int[] rgb)
+    {
+        double RsRGB = rgb[0] / 255.0;
+        double GsRGB = rgb[1] / 255.0;
+        double BsRGB = rgb[2] / 255.0;
+        double R = (RsRGB <= 0.03928) ? RsRGB / 12.92 : Math.Pow((RsRGB + 0.055) / 1.055, 2.4);
+        double G = (GsRGB <= 0.03928) ? GsRGB / 12.92 : Math.Pow((GsRGB + 0.055) / 1.055, 2.4);
+        double B = (BsRGB <= 0.03928) ? BsRGB / 12.92 : Math.Pow((BsRGB + 0.055) / 1.055, 2.4);
+        return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+    }
+
+    // Contraste (mínimo recomendado: 4.5)
+    private double Contraste(string hex1, string hex2)
+    {
+        double l1 = Luminancia(HexToRgb(hex1));
+        double l2 = Luminancia(HexToRgb(hex2));
+        return (Math.Max(l1, l2) + 0.05) / (Math.Min(l1, l2) + 0.05);
+    }
+}

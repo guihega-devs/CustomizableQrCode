@@ -6,7 +6,7 @@
 
 
 
-main {
+/*main {
     flex: 1;
 }
 
@@ -15,7 +15,7 @@ main {
 }
 
 .top-row {
-    background-color: #f7f7f7;
+    background: var(--color-primario);
     border-bottom: 1px solid #d6d5d5;
     justify-content: flex-end;
     height: 3.5rem;
@@ -23,20 +23,20 @@ main {
     align-items: center;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
+.top-row ::deep a, .top-row ::deep .btn-link {
+    white-space: nowrap;
+    margin-left: 1.5rem;
+    text-decoration: none;
+}
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+.top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+    text-decoration: underline;
+}
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+.top-row ::deep a:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}*/
 
 @media (max-width: 640.98px) {
     .top-row {
@@ -99,8 +99,8 @@ main {
 /* Header estilos generales */
 .main-header {
     width: 100%;
-    background: #003A70; /* o var(--mint) si usas azul mint */
-    color: #fff;
+    background: var(--degradado-primario);
+    color: var(--texto-primario);
     border-bottom-left-radius: 28px;
     border-bottom-right-radius: 28px;
 }
@@ -121,7 +121,7 @@ main {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #fff;
+    color: var(--texto-primario);
     text-decoration:none;
 }
 
@@ -135,7 +135,7 @@ main {
 /* ========================== NAV MENU LINKS ========================== */
 .nav-menu a {
     position: relative;
-    color: #fff;
+    color: var(--texto-primario);
     text-decoration: none;
     font-weight: 600;
     font-size: 1em;
@@ -155,7 +155,7 @@ main {
     right: 18px; /* padding-right */
     bottom: 7px;
     height: 3px;
-    background: #fff;
+    background: var(color-fondo-claro);
     border-radius: 2px;
     transform: scaleX(0);
     transform-origin: left;
@@ -168,7 +168,7 @@ main {
 .nav-menu a:not(.cta-btn-blue):not(.cta-btn-outline):hover::after,
 .nav-menu a:not(.cta-btn-blue):not(.cta-btn-outline):focus::after {
     transform: scaleX(1);
-    background: #fff;
+    background: var(color-fondo-claro);
 }
 
 /* ---- Active/current link: Underline always visible, color acento ---- */
@@ -195,7 +195,7 @@ main {
 .burger {
     background: none;
     border: none;
-    color: #fff;
+    color: var(--texto-primario);
     font-size: 2em;
     display: none;
     margin-left: 15px;
@@ -219,7 +219,7 @@ main {
 /* ========================== BOTONES ========================== */
 .cta-btn-blue {
     background: #2D5AFF;
-    color: #fff !important;
+    color: var(--texto-primario) !important;
     border-radius: 8px;
     border: none;
     padding: 10px 24px;
@@ -240,7 +240,7 @@ main {
 }
 
 .cta-btn-outline {
-    background: #fff;
+    background: var(color-fondo-claro);
     color: #2D5AFF !important;
     border: 2px solid #2D5AFF;
     border-radius: 8px;
@@ -257,7 +257,7 @@ main {
 .cta-btn-outline:hover,
 .cta-btn-outline:focus {
     background: #2D5AFF;
-    color: #fff !important;
+    color: var(--texto-primario) !important;
     border-color: #FFD166;
     box-shadow: 0 5px 18px 0 rgba(45,90,255,0.18);
 }
@@ -286,7 +286,7 @@ main {
     .main-header {
         width: 100%;
         background: #003A70; /* o var(--mint) si usas azul mint */
-        color: #fff;
+        color: var(--texto-primario);
         border-bottom-left-radius: unset;
         border-bottom-right-radius: unset;
     }
@@ -372,8 +372,12 @@ main {
 /*Footer*/
 
 .footer-mint {
-    background: var(--azul-marino);
-    color: var(--blanco);
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    background: var(--degradado-primario);
+    color: var(--texto-primario);
     font-size: 1rem;
     text-align: center;
     padding: 1.3rem 0 1rem 0;

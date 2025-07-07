@@ -43,7 +43,7 @@ namespace CustomizableQrCode.Models
     // QrModels.cs
     public class QrCodeOptions
     {
-        public string Content { get; set; } = "Hola mundo";
+        public string Content { get; set; } = "https://midominio.com";
         public ModuleShape ModuleShape { get; set; } = ModuleShape.Square;
 
         // Ojo - marco (borde)
@@ -58,8 +58,8 @@ namespace CustomizableQrCode.Models
         public EyeShape EyeShape { get; set; } = EyeShape.Square; // <= agrega esto
         public string EyeColor { get; set; } = "#000000";          // <= agrega esto
 
-        public string ModuleColor { get; set; } = "#4a90e2";
-        public string BgColor { get; set; } = "#ffffff";
+        public string ModuleColor { get; set; } = "#4B93F2";
+        public string BgColor { get; set; } = "#f7f7f7";
 
         public QrCorrectionLevel CorrectionLevel { get; set; } = QrCorrectionLevel.Q;
         public int Size { get; set; }
