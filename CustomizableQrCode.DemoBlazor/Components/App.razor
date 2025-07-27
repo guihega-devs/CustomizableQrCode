@@ -3,25 +3,137 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
-    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
-    <link rel="stylesheet" href="@Assets["app.css"]" />
-    <link rel="stylesheet" href="@Assets["CustomizableQrCode.DemoBlazor.styles.css"]" />
-    @* <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> *@
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>QrBox - Generador de Códigos QR Personalizados y Gratis</title>
+    <meta name="description" content="Crea códigos QR personalizados con logo, colores, formas y alta calidad. Ideal para negocios, eventos, redes sociales o uso profesional. Gratis y sin registro.">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="index, follow" />
 
+    <!-- Open Graph -->
+    <meta property="og:title" content="QrBox - Generador de Códigos QR Personalizados" />
+    <meta property="og:description" content="Genera códigos QR únicos con estilos, logos, formas y colores. Descarga en alta calidad." />
+    <meta property="og:image" content="https://qrbox.com.mx/img/preview.png" />
+    <meta property="og:url" content="https://qrbox.com.mx/" />
+    <meta property="og:site_name" content="QrBox" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="QrBox - Generador de Códigos QR Personalizados" />
+    <meta name="twitter:description" content="Crea y descarga tu código QR con logo, colores y formas personalizadas." />
+    <meta name="twitter:image" content="https://qrbox.com.mx/img/preview.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.png" type="image/png" />
+
+    <!-- Base y Assets -->
+    <base href="/" />
     <ImportMap />
-    <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
+
+    <!-- PRELOAD y defer estilos -->
+    <link rel="preload" href="@Assets["style.min.css"]" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@Assets["style.min.css"]"></noscript>
+
+    <link rel="preload" href="@Assets["CustomizableQrCode.DemoBlazor.styles.css"]" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@Assets["CustomizableQrCode.DemoBlazor.styles.css"]"></noscript>
+
+    <!-- FontAwesome - no bloqueo -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+
+    <!-- Preconnects -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
+    <link rel="preconnect" href="https://fundingchoicesmessages.google.com" />
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+    <link rel="dns-prefetch" href="https://qrbox.com.mx" />
+    <link rel="preconnect" href="https://qrbox.com.mx" crossorigin />
+
+    
 </head>
 
 <body>
     <Routes />
-    <script src="_framework/blazor.web.js"></script>
+        <!-- utils.js con getWindowWidth -->
+    <script src="./js/qrcode.js" defer></script>
+    <script src="_framework/blazor.web.js" defer></script>
+
     <!-- jsPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="./js/qrcode.js"></script>
+    <script>
+        window.loadJsPdf = () => {
+            if (!window.jspdfLoaded) {
+                const script = document.createElement("script");
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+                script.onload = () => window.jspdfLoaded = true;
+                document.head.appendChild(script);
+            }
+        };
+    </script>
+@*     <script>
+        window.loadQrCodeScript = () => {
+            if (!window.qrCodeLoaded) {
+                const script = document.createElement("script");
+                script.src = "/js/qrcode.js";
+                script.onload = () => window.qrCodeLoaded = true;
+                document.head.appendChild(script);
+            }
+        };
+    </script> *@
+
+
+    <!-- 🟡 Banner de cookies -->
+<div id="cookie-consent" style="display:none; position: fixed; bottom: 0; background: #fff; padding: 10px; width: 100%; z-index: 9999; box-shadow: 0 -2px 5px rgba(0,0,0,0.2); text-align:center;">
+    <p style="margin: 0; font-size: 14px;">
+        Este sitio utiliza cookies para mejorar tu experiencia.
+        <button onclick="acceptCookies()" style="margin-left: 10px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Aceptar</button>
+    </p>
+</div>
+
+<!-- 🟢 Scripts diferidos + cookies + carga condicional -->
+<script>
+    function loadThirdPartyScripts() {
+        // Google Ads
+        const ads = document.createElement('script');
+        ads.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3099527991828743";
+        ads.async = true;
+        ads.crossOrigin = "anonymous";
+        document.head.appendChild(ads);
+
+        // Google Tag Manager
+        const gtm = document.createElement('script');
+        gtm.src = "https://www.googletagmanager.com/gtag/js?id=G-BYV29NE4QY";
+        gtm.async = true;
+        gtm.onload = function () {
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', 'G-BYV29NE4QY');
+        };
+        document.head.appendChild(gtm);
+
+        // Google Funding Choices
+        const fc = document.createElement('script');
+        fc.src = "https://fundingchoicesmessages.google.com/i/pub-3099527991828743?ers=2";
+        fc.async = true;
+        document.head.appendChild(fc);
+    }
+
+    function acceptCookies() {
+        localStorage.setItem('cookies-accepted', 'true');
+        document.getElementById('cookie-consent')?.remove();
+        loadThirdPartyScripts();
+    }
+
+    // Ejecutar cuando el DOM esté listo
+    document.addEventListener("DOMContentLoaded", function () {
+        if (localStorage.getItem('cookies-accepted') === 'true') {
+            loadThirdPartyScripts();
+        } else {
+            document.getElementById('cookie-consent').style.display = 'block';
+        }
+    });
+</script>
+
 </body>
 
 </html>

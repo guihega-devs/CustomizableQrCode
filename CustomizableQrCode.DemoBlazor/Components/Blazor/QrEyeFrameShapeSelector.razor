@@ -3,7 +3,7 @@
 <div class="combo-visual-group">
     <label class="combo-title">Marco - Ojo</label>
     <div class="combo-gallery">
-        @foreach (var shape in (showAllShapes ? EyeFrameShapes : MainShapes))
+        @foreach (var shape in (IsExpanded ? EyeFrameShapes : MainShapes))
         {
             <button type="button"
                     class="combo-option @(SelectedShape == shape.Id ? "selected" : "")"
@@ -17,11 +17,11 @@
             <div class="combo-expand-container">
                 <button type="button"
                         class="combo-expand more-btn"
-                        @onclick="ToggleShapes"
+                        @onclick="ToggleSection"
                         @onmouseover="() => ShowTooltip = true"
                         @onmouseout="() => ShowTooltip = false"
                         aria-label="@(showAllShapes ? "Ver menos opciones" : "Ver más opciones")">
-                    @(showAllShapes ? "-" : "+")
+                    @(IsExpanded ? "-" : "+")
                 </button>
                 @if (ShowTooltip)
                 {
@@ -43,6 +43,8 @@
     [Parameter] public EventCallback<string> SelectedShapeChanged { get; set; }
     [Parameter] public string SelectedColor { get; set; }
     [Parameter] public EventCallback<string> SelectedColorChanged { get; set; }
+    [Parameter] public bool IsExpanded { get; set; }
+    [Parameter] public EventCallback ToggleRequested { get; set; }
 
     // Para colapsar/expandir
     private bool showAllShapes = false;
@@ -51,7 +53,7 @@
     private List<EyeFrameShapeOption> MainShapes => EyeFrameShapes.Take(maxVisible).ToList();
     private List<EyeFrameShapeOption> OtherShapes => EyeFrameShapes.Skip(maxVisible).ToList();
     private bool ShowTooltip { get; set; }
-    private void ToggleShapes() => showAllShapes = !showAllShapes;
+    private void ToggleSection() => ToggleRequested.InvokeAsync();
 
     public class EyeFrameShapeOption
     {
@@ -62,266 +64,84 @@
 
     private List<EyeFrameShapeOption> EyeFrameShapes = new()
     {
-        new EyeFrameShapeOption { Id = "Square", Name = "Square", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='4' y='4' width='24' height='24' fill='none' stroke='black' stroke-width='4' rx='2'/></svg>" },
-        new EyeFrameShapeOption { Id = "Rounded", Name = "Rounded", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='4' y='4' width='24' height='24' fill='none' stroke='black' stroke-width='4' rx='8'/></svg>" },
-        new EyeFrameShapeOption { Id = "Circle", Name = "Circle", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><circle cx='16' cy='16' r='12' fill='none' stroke='black' stroke-width='4'/></svg>" },
-        new EyeFrameShapeOption { Id = "Leaf", Name = "Leaf", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M16 6 Q26 16 16 26 Q6 16 16 6 Z' fill='none' stroke='black' stroke-width='4'/></svg>" },
-        new EyeFrameShapeOption { Id = "Diamond", Name = "Diamond", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><polygon points='16,4 28,16 16,28 4,16' fill='none' stroke='black' stroke-width='4'/></svg>" },
-        new EyeFrameShapeOption { Id = "Double", Name = "Double", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='7' y='7' width='18' height='18' fill='none' stroke='black' stroke-width='3'/><rect x='11' y='11' width='10' height='10' fill='none' stroke='black' stroke-width='2'/></svg>" },
-        new EyeFrameShapeOption { Id = "IrregularLeft", Name = "Irregular Left", Svg = (MarkupString)@"<svg width='100' height='100' viewBox='0 0 100 100' fill='none'  >
-  <path
-    d='M30,20
-       Q20,20 20,30
-       L20,90
-       L90,90
-       L90,20
-       L30,20'
-    stroke='black'
-    stroke-width='12'
-    fill='none'
-    stroke-linejoin='miter'
-    />
-</svg>" },
-        new EyeFrameShapeOption { Id = "IrregularRight", Name = "Irregular Right", Svg = (MarkupString)@"<svg width='100' height='100' viewBox='0 0 100 100' fill='none' >
-  <path
-    d='M15,15 H70 Q85,15 85,30 V85 H15 V15 Z'
-    stroke='black'
-    stroke-width='12'
-    fill='none'
-    stroke-linejoin='miter'
-  />
-</svg>
+        new EyeFrameShapeOption { Id = "Square", Name = "Square", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='4' y='4' width='24' height='24' fill='none' stroke='black' stroke-width='3' rx='2'/></svg>" },
+        new EyeFrameShapeOption { Id = "Rounded", Name = "Rounded", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='4' y='4' width='24' height='24' fill='none' stroke='black' stroke-width='3' rx='8'/></svg>" },
+        new EyeFrameShapeOption { Id = "Circle", Name = "Circle", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><circle cx='16' cy='16' r='12' fill='none' stroke='black' stroke-width='3'/></svg>" },
+        // new EyeFrameShapeOption { Id = "Leaf", Name = "Leaf", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M16 6 Q28 16 16 26 Q4 16 16 6 Z' fill='none' stroke='black' stroke-width='3'/></svg>" },
+        new EyeFrameShapeOption { Id = "Diamond", Name = "Diamond", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><polygon points='16,4 28,16 16,28 4,16' fill='none' stroke='black' stroke-width='3'/></svg>" },
+        //new EyeFrameShapeOption { Id = "Double", Name = "Double", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='7' y='7' width='18' height='18' fill='none' stroke='black' stroke-width='2.5'/><rect x='11' y='11' width='10' height='10' fill='none' stroke='black' stroke-width='2'/></svg>" },
 
-" },
-        new EyeFrameShapeOption { Id = "IrregularTop", Name = "Irregular Top", Svg = (MarkupString)@"<svg width='100' height='100' viewBox='0 0 100 100' fill='none'>
-  <path
-    d='M15,15 H85 V85 H30 Q15,85 15,70 V15 Z'
-    stroke='black'
-    stroke-width='12'
-    fill='none'
-    stroke-linejoin='miter'
-  />
-</svg>
-" },
-        new EyeFrameShapeOption { Id = "IrregularBottom", Name = "Irregular Bottom", Svg = (MarkupString)@"<svg width='100' height='100' viewBox='0 0 100 100' fill='none'>
-  <path
-    d='M15,15 H85 V70 Q85,85 70,85 H15 V15 Z'
-    stroke='black'
-    stroke-width='12'
-    fill='none'
-    stroke-linejoin='miter'
-  />
-</svg>" },
-        new EyeFrameShapeOption { Id = "Wavy", Name = "Wavy", Svg = (MarkupString)@"<svg width='428' height='420' viewBox='0 0 428 420' fill='none'>
-  <path d='
-    M38,70
-    Q80,6 141,58
-    Q192,0 241,54
-    Q298,11 338,61
-    Q401,23 388,98
-    Q428,131 382,169
-    Q432,219 372,245
-    Q450,380 360,360
-    Q321,410 280,360
-    Q207,420 146,371
-    Q90,423 59,355
-    Q6,380 33,307
-    Q-10,255 33,220
-    Q-4,152 54,124
-    Q5,80 38,70
-    Z
-  ' fill='black'/>
-</svg>
+        // Irregular shapes: Adaptados para que el trazo principal quede dentro del área central
+        new EyeFrameShapeOption { Id = "IrregularLeft", Name = "Irregular Left", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M10,8 Q8,8 8,10 L8,28 L28,28 L28,8 L10,8' stroke='black' stroke-width='3' fill='none'/></svg>" },
+        new EyeFrameShapeOption { Id = "IrregularRight", Name = "Irregular Right", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M6,6 H22 Q26,6 26,10 V26 H6 V6 Z' stroke='black' stroke-width='3' fill='none'/></svg>" },
+        new EyeFrameShapeOption { Id = "IrregularTop", Name = "Irregular Top", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M6,6 H26 V26 H12 Q6,26 6,20 V6 Z' stroke='black' stroke-width='3' fill='none'/></svg>" },
+        new EyeFrameShapeOption { Id = "IrregularBottom", Name = "Irregular Bottom", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M6,6 H26 V20 Q26,26 20,26 H6 V6 Z' stroke='black' stroke-width='3' fill='none'/></svg>" },
 
-" },
-        new EyeFrameShapeOption { Id = "Dotted", Name = "Dotted", Svg = (MarkupString)@"<svg width='279' height='274' viewBox='0 0 279 274' fill='none'>
-  <!-- Marcos de círculos (borde exterior) -->
-  <g>
-    <!-- Superior -->
-    <g>
-      <circle cx='22' cy='22' r='13' fill='black'/>
-      <circle cx='48' cy='22' r='13' fill='black'/>
-      <circle cx='74' cy='22' r='13' fill='black'/>
-      <circle cx='100' cy='22' r='13' fill='black'/>
-      <circle cx='126' cy='22' r='13' fill='black'/>
-      <circle cx='152' cy='22' r='13' fill='black'/>
-      <circle cx='178' cy='22' r='13' fill='black'/>
-      <circle cx='204' cy='22' r='13' fill='black'/>
-      <circle cx='230' cy='22' r='13' fill='black'/>
-      <circle cx='256' cy='22' r='13' fill='black'/>
-    </g>
-    <!-- Inferior -->
-    <g>
-      <circle cx='22' cy='252' r='13' fill='black'/>
-      <circle cx='48' cy='252' r='13' fill='black'/>
-      <circle cx='74' cy='252' r='13' fill='black'/>
-      <circle cx='100' cy='252' r='13' fill='black'/>
-      <circle cx='126' cy='252' r='13' fill='black'/>
-      <circle cx='152' cy='252' r='13' fill='black'/>
-      <circle cx='178' cy='252' r='13' fill='black'/>
-      <circle cx='204' cy='252' r='13' fill='black'/>
-      <circle cx='230' cy='252' r='13' fill='black'/>
-      <circle cx='256' cy='252' r='13' fill='black'/>
-    </g>
-    <!-- Izquierda -->
-    <g>
-      <circle cx='22' cy='48' r='13' fill='black'/>
-      <circle cx='22' cy='74' r='13' fill='black'/>
-      <circle cx='22' cy='100' r='13' fill='black'/>
-      <circle cx='22' cy='126' r='13' fill='black'/>
-      <circle cx='22' cy='152' r='13' fill='black'/>
-      <circle cx='22' cy='178' r='13' fill='black'/>
-      <circle cx='22' cy='204' r='13' fill='black'/>
-      <circle cx='22' cy='230' r='13' fill='black'/>
-    </g>
-    <!-- Derecha -->
-    <g>
-      <circle cx='256' cy='48' r='13' fill='black'/>
-      <circle cx='256' cy='74' r='13' fill='black'/>
-      <circle cx='256' cy='100' r='13' fill='black'/>
-      <circle cx='256' cy='126' r='13' fill='black'/>
-      <circle cx='256' cy='152' r='13' fill='black'/>
-      <circle cx='256' cy='178' r='13' fill='black'/>
-      <circle cx='256' cy='204' r='13' fill='black'/>
-      <circle cx='256' cy='230' r='13' fill='black'/>
-    </g>
-  </g>
-</svg>
-" },
-        new EyeFrameShapeOption { Id = "CircleInSquare", Name = "Circle In Square", Svg = (MarkupString)@"<svg width='273' height='247' viewBox='0 0 273 247' fill='none'>
-  <!-- Marco negro con esquinas redondeadas -->
-  <rect x='10' y='10' width='253' height='227' rx='45' fill='black'/>
-</svg>
-" },
-        new EyeFrameShapeOption { Id = "Pixelated", Name = "Pixelated", Svg = (MarkupString)@"<svg width='221' height='215' viewBox='0 0 221 215' fill='none'>
-  <!-- Borde superior -->
-  <rect x='8' y='8' width='20' height='20' fill='black'/>
-  <rect x='36' y='8' width='20' height='20' fill='black'/>
-  <rect x='64' y='8' width='20' height='20' fill='black'/>
-  <rect x='92' y='8' width='20' height='20' fill='black'/>
-  <rect x='120' y='8' width='20' height='20' fill='black'/>
-  <rect x='148' y='8' width='20' height='20' fill='black'/>
-  <rect x='176' y='8' width='20' height='20' fill='black'/>
-  <rect x='204' y='8' width='9' height='20' fill='black'/>
-  <!-- Borde inferior -->
-  <rect x='8' y='187' width='20' height='20' fill='black'/>
-  <rect x='36' y='187' width='20' height='20' fill='black'/>
-  <rect x='64' y='187' width='20' height='20' fill='black'/>
-  <rect x='92' y='187' width='20' height='20' fill='black'/>
-  <rect x='120' y='187' width='20' height='20' fill='black'/>
-  <rect x='148' y='187' width='20' height='20' fill='black'/>
-  <rect x='176' y='187' width='20' height='20' fill='black'/>
-  <rect x='204' y='187' width='9' height='20' fill='black'/>
-  <!-- Borde izquierdo -->
-  <rect x='8' y='36' width='20' height='20' fill='black'/>
-  <rect x='8' y='64' width='20' height='20' fill='black'/>
-  <rect x='8' y='92' width='20' height='20' fill='black'/>
-  <rect x='8' y='120' width='20' height='20' fill='black'/>
-  <rect x='8' y='148' width='20' height='20' fill='black'/>
-  <rect x='8' y='176' width='20' height='11' fill='black'/>
-  <!-- Borde derecho -->
-  <rect x='204' y='36' width='9' height='20' fill='black'/>
-  <rect x='204' y='64' width='9' height='20' fill='black'/>
-  <rect x='204' y='92' width='9' height='20' fill='black'/>
-  <rect x='204' y='120' width='9' height='20' fill='black'/>
-  <rect x='204' y='148' width='9' height='20' fill='black'/>
-  <rect x='204' y='176' width='9' height='11' fill='black'/>
-</svg>
-" },
-        new EyeFrameShapeOption { Id = "RoundedAll", Name = "Rounded All", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='4' y='4' width='24' height='24' fill='none' stroke='black' stroke-width='4' rx='12'/></svg>" },
-        new EyeFrameShapeOption { Id = "CornerRect", Name = "Corner Rect", Svg = (MarkupString)@"<svg width='269' height='300' viewBox='0 0 269 300' fill='none'>
-  <!-- Marco exterior: 3 esquinas redondeadas, 1 (inferior derecha) recta -->
-  <path d='
-    M49,25
-    H220
-    Q244,25 244,49
-    V220
-    L244,244
-    H49
-    Q25,244 25,220
-    V49
-    Q25,25 49,25
-    Z
-  ' stroke='black' stroke-width='24' fill='none'/>
-</svg>
+        // Wavy
+        //new EyeFrameShapeOption { Id = "Wavy", Name = "Wavy", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28' fill='none'><path d='M3,5 Q7,1 11,5 Q14,0 18,5 Q21,1 25,5 Q29,3 28,8 Q32,10 28,14 Q32,18 28,20 Q31,28 24,27 Q21,31 18,27 Q13,32 9,28 Q5,32 3,27 Q0,28 2,23 Q-1,19 2,17 Q-1,12 4,10 Q0,7 3,5 Z' fill='black'/></svg>" },
 
+        // Dotted (Bordes de círculos, simplificado para 32x32)
+        // new EyeFrameShapeOption { Id = "Dotted", Name = "Dotted", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28' fill='none'>
+        //     <circle cx='8' cy='4' r='2' fill='black'/>
+        //     <circle cx='16' cy='4' r='2' fill='black'/>
+        //     <circle cx='24' cy='4' r='2' fill='black'/>
+        //     <circle cx='8' cy='28' r='2' fill='black'/>
+        //     <circle cx='16' cy='28' r='2' fill='black'/>
+        //     <circle cx='24' cy='28' r='2' fill='black'/>
+        //     <circle cx='4' cy='8' r='2' fill='black'/>
+        //     <circle cx='4' cy='16' r='2' fill='black'/>
+        //     <circle cx='4' cy='24' r='2' fill='black'/>
+        //     <circle cx='28' cy='8' r='2' fill='black'/>
+        //     <circle cx='28' cy='16' r='2' fill='black'/>
+        //     <circle cx='28' cy='24' r='2' fill='black'/>
+        // </svg>" },
 
-" },
-        new EyeFrameShapeOption { Id = "TwoCornerRect", Name = "Two Corner Rect", Svg = (MarkupString)@"<svg width='249' height='247' viewBox='0 0 249 247' fill='none'>
-  <!-- Marco exterior con dos esquinas opuestas redondeadas -->
-  <path d='
-    M14,14
-    H187
-    Q235,14 235,62
-    V187
-    H62
-    Q14,187 14,139
-    V14
-    Z
-  ' stroke='black' stroke-width='16' fill='none'/>
-</svg>
-" },
-        new EyeFrameShapeOption { Id = "CornerRectRadio", Name = "Corner Rect Radio", Svg = (MarkupString)@"<svg width='183' height='169' viewBox='0 0 183 169' fill='none'>
-  <!-- Marco exterior: 3 esquinas bien redondas, 1 (inf. der.) recta -->
-  <path d='
-    M13,84
-    Q14,18 86,13
-    Q169,16 170,84
-    L170,156
-    L89,156
-    Q16,155 13,84
-    Z
-  ' fill='black'/>
-  <!-- Círculo blanco central -->
-  <circle cx='91.5' cy='84.5' r='58' fill='white'/>
-</svg>" },
-        new EyeFrameShapeOption { Id = "TwoCornerRectIn", Name = "Two Corner Rect In", Svg = (MarkupString)@"<svg width='281' height='258' viewBox='0 0 281 258' fill='none'>
-  <!-- Marco exterior cuadrado con esquinas redondeadas -->
-  <rect x='14' y='14' width='220' height='220' rx='55' fill='black'/>
-  <!-- Recortes cóncavos: esquina sup der e inf izq -->
-  <circle cx='234' cy='34' r='40' fill='white'/>
-  <circle cx='34' cy='234' r='40' fill='white'/>
-  <!-- Cuadro blanco central -->
-  <rect x='60' y='60' width='120' height='120' fill='white'/>
-</svg>" },
-        new EyeFrameShapeOption { Id = "CornerRoundOut", Name = "Corner Round Out", Svg = (MarkupString)@"<svg width='183' height='169' viewBox='0 0 183 169' fill='none'>
-  <!-- Marco exterior: 3 esquinas bien redondas, 1 (inf. der.) recta -->
-  <path d='
-    M15,15
-    Q14,18 86,13
-    Q169,16 170,84
-    L170,157
-    L89,157
-    Q16,155 13,84
-    Z
-  ' fill='black'/>
-  <!-- Círculo blanco central -->
-  <circle cx='91.5' cy='84.5' r='58' fill='white'/>
-</svg>" },
-        new EyeFrameShapeOption { Id = "CornerRoundOutSP", Name = "Corner Round Out SP", Svg = (MarkupString)@"<svg width='183' height='169' viewBox='0 0 183 169' fill='none'>
-  <!-- Marco exterior: 3 esquinas bien redondas, 1 (inf. der.) recta -->
-  <path d='
-    M15,15
-    Q14,18 86,13
-    Q169,16 170,84
-    L170,156
-    L89,157
-    Q16,155 13,84
-    Z
-  ' fill='black'/>
-  <!-- Círculo blanco central, más pequeño y dentro del marco -->
-  <path d='
-    M35,60
-    Q39,32 87,30
-    Q154,33 155,90
-    L155,138
-    L88,139
-    Q32,136 35,90
-    Z
-  ' fill='white'/>
-</svg>
-" },
+        // Circle in Square
+        new EyeFrameShapeOption { Id = "CircleInSquare", Name = "Circle In Square", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='4' y='4' width='24' height='24' rx='8' fill='black'/><circle cx='16' cy='16' r='10' fill='white'/></svg>" },
+
+        // Pixelated (bordes en bloques)
+        // new EyeFrameShapeOption { Id = "Pixelated", Name = "Pixelated", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28' fill='none'>
+        //   <rect x='3' y='3' width='5' height='5' fill='black'/>
+        //   <rect x='9' y='3' width='5' height='5' fill='black'/>
+        //   <rect x='15' y='3' width='5' height='5' fill='black'/>
+        //   <rect x='21' y='3' width='5' height='5' fill='black'/>
+        //   <rect x='3' y='24' width='5' height='5' fill='black'/>
+        //   <rect x='9' y='24' width='5' height='5' fill='black'/>
+        //   <rect x='15' y='24' width='5' height='5' fill='black'/>
+        //   <rect x='21' y='24' width='5' height='5' fill='black'/>
+        //   <rect x='3' y='9' width='5' height='5' fill='black'/>
+        //   <rect x='3' y='15' width='5' height='5' fill='black'/>
+        //   <rect x='3' y='21' width='5' height='2' fill='black'/>
+        //   <rect x='24' y='9' width='5' height='5' fill='black'/>
+        //   <rect x='24' y='15' width='5' height='5' fill='black'/>
+        //   <rect x='24' y='21' width='5' height='2' fill='black'/>
+        // </svg>" },
+
+        // new EyeFrameShapeOption { Id = "RoundedAll", Name = "Rounded All", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><rect x='4' y='4' width='24' height='24' fill='none' stroke='black' stroke-width='3' rx='12'/></svg>" },
+
+        // CornerRect (3 esquinas redondeadas, 1 recta)
+        new EyeFrameShapeOption { Id = "CornerRect", Name = "Corner Rect", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M7,4 H25 Q28,4 28,7 V25 L28,28 H7 Q4,28 4,25 V7 Q4,4 7,4 Z' stroke='black' stroke-width='3' fill='none'/></svg>" },
+
+        // TwoCornerRect (2 esquinas opuestas redondeadas)
+        new EyeFrameShapeOption { Id = "TwoCornerRect", Name = "Two Corner Rect", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M5,5 H25 Q29,5 29,9 V25 H9 Q5,25 5,21 V5 Z' stroke='black' stroke-width='3' fill='none'/></svg>" },
+
+        // CornerRectRadio (3 esquinas bien redondas, 1 recta)
+        new EyeFrameShapeOption { Id = "CornerRectRadio", Name = "Corner Rect Radio", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M5,16 Q5,6 16,5 Q27,6 27,16 L27,27 L16,27 Q5,27 5,16 Z' fill='black'/><circle cx='16' cy='16' r='9' fill='white'/></svg>" },
+
+        // TwoCornerRectIn (cuadrado con dos esquinas redondeadas, recortes cóncavos)
+        new EyeFrameShapeOption { Id = "TwoCornerRectIn", Name = "Two Corner Rect In", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28' fill='none'>
+        <rect x='4' y='4' width='24' height='24' rx='7' fill='black'/>
+        <circle cx='28' cy='6' r='6' fill='white'/>
+        <circle cx='6' cy='28' r='6' fill='white'/>
+        <rect x='9' y='9' width='14' height='14' fill='white'/>
+    </svg>" },
+        // CornerRoundOut (3 esquinas bien redondas, 1 recta)
+        new EyeFrameShapeOption { Id = "CornerRoundOut", Name = "Corner Round Out", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M5,5 Q5,6 16,5 Q27,6 27,16 L27,27 L16,27 Q5,27 5,16 Z' fill='black'/><circle cx='16' cy='16' r='9' fill='white'/></svg>" },
+
+        // CornerRoundOutSP (versión especial, círculo blanco central más pequeño)
+        new EyeFrameShapeOption { Id = "CornerRoundOutSP", Name = "Corner Round Out SP", Svg = (MarkupString)@"<svg viewBox='0 0 32 32' width='28' height='28'><path d='M5,5 Q5,6 16,5 Q27,6 27,16 L27,27 L16,27 Q5,27 5,16 Z' fill='black'/><path d='M9,16 Q10,7 16,7 Q23,8 23,17 L23,25 L16,25 Q8,24 9,17 Z' fill='white'/></svg>" },
     };
+
 
     private async Task SelectShape(string id)
     {

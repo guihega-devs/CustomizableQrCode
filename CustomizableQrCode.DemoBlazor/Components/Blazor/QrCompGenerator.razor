@@ -1,4 +1,6 @@
 ﻿@using System.Threading.Tasks
+@using CustomizableQrCode.Utils
+@using CustomizableQrCode.Logic
 @using CustomizableQrCode.Models
 @using System.Text
 @using CustomizableQrCode.QrCodeRenderer
@@ -7,25 +9,12 @@
 
 
 <div class="radial-selector-container" aria-label="Selector tipo de QR">
-@*     <div class="qr-type-selector">
-        @foreach (var opt in QrTypes)
-        {
-            var isSelected = opt.Type == SelectedType;
-            <button type="button"
-                    class="qr-type-btn @(isSelected ? "selected" : "")"
-                    title="@opt.Tooltip"
-                    @onclick="() => SelectType(opt.Type)">
-                <i class="@opt.Icon"></i>
-                <span class="qr-type-tooltip">@opt.Tooltip</span>
-            </button>
-        }
-    </div> *@
     <div class="qr-main-content">
         <!-- Sidebar -->
         <div class="sidebar-qr-types">
             @foreach (var (opt, idx) in QrTypes.Select((opt, idx) => (opt, idx)))
             {
-                if (!showAllTypes && idx >= visibleTypesCount)
+                if (!AppEnvironment.IsTestMode && !showAllTypes && idx >= visibleTypesCount)
                 {
                     continue;
                 }
@@ -52,477 +41,520 @@
                     @if (ShowTooltip)
                     {
                         <span class="qr-type-tooltip">
-                            @(showAllTypes ? "Ver menos opciones" : "Ver más opciones")
+                            @(showAllTypes ? "Menos tipo de contenido" : "Más tipo de contenido")
                         </span>
                     }
                 </button>
             }
         </div>
 
+        <!-- Sidebar -->
+        <!-- Botón flotante -->
+        <button class="floating-toggle-btn" @onclick="ToggleSidebar">
+            <i class="fas @(isSidebarOpen ? "fa-times" : "fa-bars")"></i>
+        </button>
+
+        @if (isSidebarOpen)
+        {
+            <div class="fullscreen-sidebar-overlay" @onclick="ToggleSidebar">
+                <div class="sidebar-panel" @onclick:stopPropagation="true">
+                    @* @foreach (var (opt, idx) in QrTypes.Select((opt, idx) => (opt, idx)))
+                    {
+                        if (!AppEnvironment.IsTestMode && !showAllTypes && idx >= visibleTypesCount)
+                            continue;
+
+                        <button class="sidebar-btn @(SelectedType == opt.Type ? "active" : "")"
+                                @onclick="() => SelectType(opt.Type)">
+                            <i class="@opt.Icon"></i>
+                            <span class="qr-type-tooltip">@opt.Tooltip</span>
+                        </button>
+                    } *@
+                    @foreach (var opt in QrTypes)
+                    {
+                        <button class="sidebar-btn @(SelectedType == opt.Type ? "active" : "")"
+                                @onclick="() => SelectType(opt.Type)">
+                            <i class="@opt.Icon"></i>
+                            <span class="qr-type-tooltip">@opt.Tooltip</span>
+                        </button>
+                    }
+                    @* @if (QrTypes.Count > visibleTypesCount)
+                    {
+                        <button class="sidebar-btn" @onclick="ToggleSidebarTypes">
+                            <i class="fas @(showAllTypes ? "fa-chevron-up" : "fa-ellipsis-h")"></i>
+                            <span class="qr-type-tooltip">
+                                @(showAllTypes ? "Menos tipo de contenido" : "Más tipo de contenido")
+                            </span>
+                        </button>
+                    } *@
+                </div>
+            </div>
+        }
+
         <!-- Izquierda: controles configurables -->
         <!-- Controles dinámicos según tipo -->
         @* Este bloque cambia según el tipo seleccionado *@
         <div class="main-content">
-        <div class="qr-form-col">
-            <div class="qr-content-section">
-                <div class="qr-config-card">
-                    @switch (SelectedType)
-                        {
-                            case QrContentType.Link:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">Enlace</label>
-                                        <InputText @bind-Value="LinkUrl" class="qr-input" placeholder="Introduce la dirección" />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Link)
+            <div class="qr-form-col">
+                <div class="qr-content-section">
+                    <div class="qr-config-card">
+                        @switch (SelectedType)
+                            {
+                                case QrContentType.Link:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">Enlace</label>
+                                            <InputText @bind-Value="LinkUrl" class="qr-input" placeholder="Introduce la dirección"  />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Link)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case QrContentType.Text:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">Texto</label>
+                                            <InputTextArea @bind-Value="TextContent" class="qr-textarea" placeholder="Introduce el texto..." />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Text)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case QrContentType.Email:
+                                    <div class="qr-config-fields">
+                                        <div>
+                                            <label class="qr-label">Correo destinatario</label>
+                                            <InputText @bind-Value="EmailTo" class="qr-input" placeholder="ejemplo@email.com" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Asunto</label>
+                                            <InputText @bind-Value="EmailSubject" class="qr-input" placeholder="Asunto del correo" />
+                                        </div>
+                                        <div class="full-width">
+                                            <label class="qr-label">Mensaje</label>
+                                            <InputTextArea @bind-Value="EmailBody" class="qr-textarea" placeholder="Escribe tu mensaje..." />
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Email)
                                         {
                                             <div class="error-msg">@errorMsg</div>
                                         }
                                     </div>
-                                </div>
-                                break;
+                                    break;
 
-                            case QrContentType.Text:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">Texto</label>
-                                        <InputTextArea @bind-Value="TextContent" class="qr-textarea" placeholder="Introduce el texto..." />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Text)
+                                case QrContentType.Call:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">Teléfono</label>
+                                            <InputText @bind-Value="Phone" class="qr-input" placeholder="Ej: +521234567890" />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Call)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case QrContentType.SMS:
+                                    <div class="qr-config-fields">
+                                        <div>
+                                            <label class="qr-label">Teléfono</label>
+                                            <InputText @bind-Value="SmsPhone" class="qr-input" placeholder="Teléfono" />
+                                        </div>
+                                        <div class="full-width">
+                                            <label class="qr-label">Mensaje SMS</label>
+                                            <InputTextArea @bind-Value="SmsMessage" class="qr-textarea" placeholder="Mensaje SMS" />
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.SMS)
                                         {
                                             <div class="error-msg">@errorMsg</div>
                                         }
                                     </div>
-                                </div>
-                                break;
+                                    break;
 
-                            case QrContentType.Email:
-                                <div class="qr-config-fields">
-                                    <div>
-                                        <label class="qr-label">Correo destinatario</label>
-                                        <InputText @bind-Value="EmailTo" class="qr-input" placeholder="ejemplo@email.com" />
-                                    </div>
-                                    <div>
-                                        <label class="qr-label">Asunto</label>
-                                        <InputText @bind-Value="EmailSubject" class="qr-input" placeholder="Asunto del correo" />
-                                    </div>
-                                    <div class="full-width">
-                                        <label class="qr-label">Mensaje</label>
-                                        <InputTextArea @bind-Value="EmailBody" class="qr-textarea" placeholder="Escribe tu mensaje..." />
-                                    </div>
-                                    @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Email)
-                                    {
-                                        <div class="error-msg">@errorMsg</div>
-                                    }
-                                </div>
-                                break;
-
-                            case QrContentType.Call:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">Teléfono</label>
-                                        <InputText @bind-Value="Phone" class="qr-input" placeholder="Ej: +521234567890" />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Call)
+                                case QrContentType.VCard:
+                                    <div class="qr-config-fields">
+                                        <div>
+                                            <label class="qr-label">Nombre</label>
+                                            <InputText @bind-Value="VCardFirstName" class="qr-input" placeholder="Nombre" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Apellido</label>
+                                            <InputText @bind-Value="VCardLastName" class="qr-input" placeholder="Apellido" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Teléfono</label>
+                                            <InputText @bind-Value="VCardPhone" class="qr-input" placeholder="Teléfono" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Email</label>
+                                            <InputText @bind-Value="VCardEmail" class="qr-input" placeholder="Email" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Empresa</label>
+                                            <InputText @bind-Value="VCardCompany" class="qr-input" placeholder="Empresa" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Cargo</label>
+                                            <InputText @bind-Value="VCardJob" class="qr-input" placeholder="Cargo" />
+                                        </div>
+                                        <div class="full-width">
+                                            <label class="qr-label">Dirección</label>
+                                            <InputText @bind-Value="VCardAddress" class="qr-input" placeholder="Dirección" />
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.VCard)
                                         {
                                             <div class="error-msg">@errorMsg</div>
                                         }
                                     </div>
-                                </div>
-                                break;
+                                    break;
 
-                            case QrContentType.SMS:
-                                <div class="qr-config-fields">
-                                    <div>
-                                        <label class="qr-label">Teléfono</label>
-                                        <InputText @bind-Value="SmsPhone" class="qr-input" placeholder="Teléfono" />
+                                case QrContentType.WhatsApp:
+                                    <div class="qr-config-fields">
+                                        <div>
+                                            <label class="qr-label">Teléfono WhatsApp</label>
+                                            <InputText @bind-Value="WhatsAppPhone" class="qr-input" placeholder="Teléfono WhatsApp" />
+                                        </div>
+                                        <div class="full-width">
+                                            <label class="qr-label">Mensaje</label>
+                                            <InputTextArea @bind-Value="WhatsAppMessage" class="qr-textarea" placeholder="Mensaje para enviar" />
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.WhatsApp)
+                                        {
+                                            <div class="error-msg">@errorMsg</div>
+                                        }
                                     </div>
-                                    <div class="full-width">
-                                        <label class="qr-label">Mensaje SMS</label>
-                                        <InputTextArea @bind-Value="SmsMessage" class="qr-textarea" placeholder="Mensaje SMS" />
-                                    </div>
-                                    @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.SMS)
-                                    {
-                                        <div class="error-msg">@errorMsg</div>
-                                    }
-                                </div>
-                                break;
+                                    break;
 
-                            case QrContentType.VCard:
-                                <div class="qr-config-fields">
-                                    <div>
-                                        <label class="qr-label">Nombre</label>
-                                        <InputText @bind-Value="VCardFirstName" class="qr-input" placeholder="Nombre" />
+                                case QrContentType.WiFi:
+                                    <div class="qr-config-fields">
+                                        <div>
+                                            <label class="qr-label">Nombre de Red (SSID)</label>
+                                            <InputText @bind-Value="WiFiSSID" class="qr-input" placeholder="Nombre de red" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Contraseña</label>
+                                            <InputText @bind-Value="WiFiPassword" class="qr-input" placeholder="Contraseña" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Tipo</label>
+                                            <InputSelect @bind-Value="WiFiEncryption" class="qr-select">
+                                                <option value="WPA">WPA/WPA2</option>
+                                                <option value="WEP">WEP</option>
+                                                <option value="nopass">Sin contraseña</option>
+                                            </InputSelect>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.WiFi)
+                                        {
+                                            <div class="error-msg">@errorMsg</div>
+                                        }
                                     </div>
-                                    <div>
-                                        <label class="qr-label">Apellido</label>
-                                        <InputText @bind-Value="VCardLastName" class="qr-input" placeholder="Apellido" />
-                                    </div>
-                                    <div>
-                                        <label class="qr-label">Teléfono</label>
-                                        <InputText @bind-Value="VCardPhone" class="qr-input" placeholder="Teléfono" />
-                                    </div>
-                                    <div>
-                                        <label class="qr-label">Email</label>
-                                        <InputText @bind-Value="VCardEmail" class="qr-input" placeholder="Email" />
-                                    </div>
-                                    <div>
-                                        <label class="qr-label">Empresa</label>
-                                        <InputText @bind-Value="VCardCompany" class="qr-input" placeholder="Empresa" />
-                                    </div>
-                                    <div>
-                                        <label class="qr-label">Cargo</label>
-                                        <InputText @bind-Value="VCardJob" class="qr-input" placeholder="Cargo" />
-                                    </div>
-                                    <div class="full-width">
-                                        <label class="qr-label">Dirección</label>
-                                        <InputText @bind-Value="VCardAddress" class="qr-input" placeholder="Dirección" />
-                                    </div>
-                                    @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.VCard)
-                                    {
-                                        <div class="error-msg">@errorMsg</div>
-                                    }
-                                </div>
-                                break;
+                                    break;
 
-                            case QrContentType.WhatsApp:
-                                <div class="qr-config-fields">
-                                    <div>
-                                        <label class="qr-label">Teléfono WhatsApp</label>
-                                        <InputText @bind-Value="WhatsAppPhone" class="qr-input" placeholder="Teléfono WhatsApp" />
+                                case QrContentType.PDF:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">URL del PDF</label>
+                                            <InputText @bind-Value="PdfUrl" class="qr-input" placeholder="URL del PDF" />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.PDF)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
                                     </div>
-                                    <div class="full-width">
-                                        <label class="qr-label">Mensaje</label>
-                                        <InputTextArea @bind-Value="WhatsAppMessage" class="qr-textarea" placeholder="Mensaje para enviar" />
-                                    </div>
-                                    @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.WhatsApp)
-                                    {
-                                        <div class="error-msg">@errorMsg</div>
-                                    }
-                                </div>
-                                break;
+                                    break;
 
-                            case QrContentType.WiFi:
-                                <div class="qr-config-fields">
-                                    <div>
-                                        <label class="qr-label">Nombre de Red (SSID)</label>
-                                        <InputText @bind-Value="WiFiSSID" class="qr-input" placeholder="Nombre de red" />
+                                case QrContentType.App:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">URL de la app</label>
+                                            <InputText @bind-Value="AppUrl" class="qr-input" placeholder="URL de la App (App Store, Play Store...)" />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.App)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="qr-label">Contraseña</label>
-                                        <InputText @bind-Value="WiFiPassword" class="qr-input" placeholder="Contraseña" />
+                                    break;
+
+                                case QrContentType.Images:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">URL de la imagen</label>
+                                            <InputText @bind-Value="ImageUrl" class="qr-input" placeholder="URL de la imagen" />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Images)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label class="qr-label">Tipo</label>
-                                        <InputSelect @bind-Value="WiFiEncryption" class="qr-select">
-                                            <option value="WPA">WPA/WPA2</option>
-                                            <option value="WEP">WEP</option>
-                                            <option value="nopass">Sin contraseña</option>
+                                    break;
+
+                                case QrContentType.Video:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">URL del video</label>
+                                            <InputText @bind-Value="VideoUrl" class="qr-input" placeholder="URL del video" />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Video)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case QrContentType.SocialMedia:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">URL del perfil/red social</label>
+                                            <InputText @bind-Value="SocialUrl" class="qr-input" placeholder="URL del perfil social" />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.SocialMedia)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case QrContentType.Event:
+                                    <div class="qr-config-fields">
+                                        <div>
+                                            <label class="qr-label">Título del evento</label>
+                                            <InputText @bind-Value="EventTitle" class="qr-input" placeholder="Título del evento" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Ubicación</label>
+                                            <InputText @bind-Value="EventLocation" class="qr-input" placeholder="Ubicación" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Fecha de inicio</label>
+                                            <InputText @bind-Value="EventStart" class="qr-input" placeholder="YYYY-MM-DD HH:mm" />
+                                        </div>
+                                        <div>
+                                            <label class="qr-label">Fecha de fin</label>
+                                            <InputText @bind-Value="EventEnd" class="qr-input" placeholder="YYYY-MM-DD HH:mm" />
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Event)
+                                        {
+                                            <div class="error-msg">@errorMsg</div>
+                                        }
+                                    </div>
+                                    break;
+
+                                case QrContentType.Barcode2D:
+                                    <div class="qr-config-fields">
+                                        <div class="full-width">
+                                            <label class="qr-label">Contenido de código de barras</label>
+                                            <InputText @bind-Value="Barcode2DContent" class="qr-input" placeholder="Texto o número" />
+                                            @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Barcode2D)
+                                            {
+                                                <div class="error-msg">@errorMsg</div>
+                                            }
+                                        </div>
+                                    </div>
+                                    break;
+                            }
+                
+                    </div>
+                </div>
+
+                <div class="qr-style-section">
+                    <!-- Controles comunes (personalización) -->
+                    <div class="qr-config-common">
+
+                        <EditForm Model="qrOptions">
+                            <div class="qr-card">
+
+                                <!-- 1a fila: Módulo + Ojo-Marco -->
+                                <div class="qr-row">
+                                    <div class="qr-group-double">
+                                        <QrModuleShapeSelector SelectedShape="qrOptions.ModuleShape" 
+                                                                SelectedShapeChanged="OnShapeChanged" 
+                                                                SelectedColor="qrOptions.ModuleColor" 
+                                                                SelectedColorChanged="OnColorShapeChanged" />
+                                            @if (showToastColor)
+                                            {
+                                                <div class="qr-toast-warning">
+                                                    @toastMessage
+                                                </div>
+                                            }
+                                    </div>
+                                </div>
+
+                                <!-- 1a fila: Módulo + Ojo-Marco -->
+                                <div class="qr-row">
+                                    <div class="qr-group-double">
+                                        <QrEyeFrameShapeSelector SelectedShape="qrOptions.EyeFrameShape"
+                                                                    SelectedShapeChanged="OnFrameChanged"
+                                                                    SelectedColor="qrOptions.EyeFrameColor"
+                                                                     SelectedColorChanged="OnFrameColorChanged"
+                                                                     IsExpanded='@(ExpandedSection == "Frame")'
+                                                                     ToggleRequested='@(() => ToggleSection("Frame"))' />
+                                    </div>
+                                </div>
+
+                                <!-- 2a fila: Ojo-Centro + Ojo-retro -->
+                                <div class="qr-row">
+                                    <div class="qr-group-double">
+                                        <QrEyeCenterShapeSelector SelectedEyeShape="qrOptions.EyeCenterShape"
+                                                                    SelectedEyeShapeChanged="OnCenterEyeChanged"
+                                                                    SelectedEyeColor="qrOptions.EyeCenterColor"
+                                                                      SelectedEyeColorChanged="OnCenterEyeColorChanged"
+                                                                      IsExpanded='@(ExpandedSection == "Center")'
+                                                                      ToggleRequested='@(() => ToggleSection("Center"))'
+                                                                      AllowedCenters="AllowedCenters" />
+                                    </div>
+                                </div>
+
+                                <!-- 3a fila: Corrección + Tamaño -->
+                                <div class="qr-row">
+                                    <div class="qr-group-simple">
+                                        <label>
+                                            Corrección
+                                            <span class="custom-tooltip">
+                                                <svg width="18" height="18" style="vertical-align:middle;">
+                                                    <circle cx="9" cy="9" r="9" fill="#23a6e8" />
+                                                    <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
+                                                </svg>
+                                                <span class="custom-tooltip-text">Define cuánta información puede recuperar el QR si se daña o ensucia. Q es estándar, H es máximo.</span>
+                                            </span>
+                                        </label>
+                                        <InputSelect @bind-Value="qrOptions.CorrectionLevel" class="qr-input">
+                                            @foreach (var level in Enum.GetNames(typeof(QrCorrectionLevel)))
+                                            {
+                                                <option value="@level">@level</option>
+                                            }
                                         </InputSelect>
                                     </div>
-                                    @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.WiFi)
-                                    {
-                                        <div class="error-msg">@errorMsg</div>
-                                    }
-                                </div>
-                                break;
+                                    <div class="qr-group-simple" style="display:none">
+                                        <label>
+                                            Tamaño
+                                            <span class="custom-tooltip">
+                                                <svg width="18" height="18" style="vertical-align:middle;">
+                                                    <circle cx="9" cy="9" r="9" fill="#23a6e8" />
+                                                    <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
+                                                </svg>
+                                                <span class="custom-tooltip-text"> Tamaño en píxeles del QR generado. </span>
+                                            </span>
+                                        </label>
+                                        <InputNumber @bind-Value="qrOptions.Size" min="128" max="1024" class="qr-input" />
+                                    </div>
+                                    <div class="qr-group-simple">
+                                        <label>
+                                            Calidad
+                                            <span class="custom-tooltip">
+                                                <svg width="18" height="18" style="vertical-align:middle;">
+                                                    <circle cx="9" cy="9" r="9" fill="#23a6e8" />
+                                                    <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
+                                                </svg>
+                                                <span class="custom-tooltip-text">Entre mayor calidad, el código QR se verá más nítido al exportar o imprimir.</span>
+                                            </span>
+                                        </label>
+                                        <div class="quality-slider-wrap">
+                                            <button @onclick="DecrementQuality" class="icon-btn">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="range"
+                                                    min="0" max="4" step="1"
+                                                    @onmousedown="@(() => isSliderActive = true)"
+                                                    @onmouseup="@(() => isSliderActive = false)"
+                                                    @onmouseleave="@(() => isSliderActive = false)"
+                                                    class="quality-slider slider @(isSliderActive ? "engranaje-activo" : "")"
+                                                    @bind="Quality" />
+                                            <button @onclick="IncrementQuality" class="icon-btn">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <div class="text-center fw-bold quality-desc">
+                                                @(Quality switch
+                                            {
+                                                0 => "Básica",
+                                                1 => "Normal",
+                                                2 => "Buena",
+                                                3 => "Alta",
+                                                4 => "Excelente",
+                                                _ => "Custom"
+                                            })
+                                        </div>
 
-                            case QrContentType.PDF:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">URL del PDF</label>
-                                        <InputText @bind-Value="PdfUrl" class="qr-input" placeholder="URL del PDF" />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.PDF)
-                                        {
-                                            <div class="error-msg">@errorMsg</div>
-                                        }
                                     </div>
                                 </div>
-                                break;
 
-                            case QrContentType.App:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">URL de la app</label>
-                                        <InputText @bind-Value="AppUrl" class="qr-input" placeholder="URL de la App (App Store, Play Store...)" />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.App)
-                                        {
-                                            <div class="error-msg">@errorMsg</div>
-                                        }
-                                    </div>
-                                </div>
-                                break;
-
-                            case QrContentType.Images:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">URL de la imagen</label>
-                                        <InputText @bind-Value="ImageUrl" class="qr-input" placeholder="URL de la imagen" />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Images)
-                                        {
-                                            <div class="error-msg">@errorMsg</div>
-                                        }
-                                    </div>
-                                </div>
-                                break;
-
-                            case QrContentType.Video:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">URL del video</label>
-                                        <InputText @bind-Value="VideoUrl" class="qr-input" placeholder="URL del video" />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Video)
-                                        {
-                                            <div class="error-msg">@errorMsg</div>
-                                        }
-                                    </div>
-                                </div>
-                                break;
-
-                            case QrContentType.SocialMedia:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">URL del perfil/red social</label>
-                                        <InputText @bind-Value="SocialUrl" class="qr-input" placeholder="URL del perfil social" />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.SocialMedia)
-                                        {
-                                            <div class="error-msg">@errorMsg</div>
-                                        }
-                                    </div>
-                                </div>
-                                break;
-
-                            case QrContentType.Event:
-                                <div class="qr-config-fields">
-                                    <div>
-                                        <label class="qr-label">Título del evento</label>
-                                        <InputText @bind-Value="EventTitle" class="qr-input" placeholder="Título del evento" />
-                                    </div>
-                                    <div>
-                                        <label class="qr-label">Ubicación</label>
-                                        <InputText @bind-Value="EventLocation" class="qr-input" placeholder="Ubicación" />
-                                    </div>
-                                    <div>
-                                        <label class="qr-label">Fecha de inicio</label>
-                                        <InputText @bind-Value="EventStart" class="qr-input" placeholder="YYYY-MM-DD HH:mm" />
-                                    </div>
-                                    <div>
-                                        <label class="qr-label">Fecha de fin</label>
-                                        <InputText @bind-Value="EventEnd" class="qr-input" placeholder="YYYY-MM-DD HH:mm" />
-                                    </div>
-                                    @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Event)
-                                    {
-                                        <div class="error-msg">@errorMsg</div>
-                                    }
-                                </div>
-                                break;
-
-                            case QrContentType.Barcode2D:
-                                <div class="qr-config-fields">
-                                    <div class="full-width">
-                                        <label class="qr-label">Contenido de código de barras</label>
-                                        <InputText @bind-Value="Barcode2DContent" class="qr-input" placeholder="Texto o número" />
-                                        @if (!string.IsNullOrEmpty(errorMsg) && SelectedType == QrContentType.Barcode2D)
-                                        {
-                                            <div class="error-msg">@errorMsg</div>
-                                        }
-                                    </div>
-                                </div>
-                                break;
-                        }
-                
-                </div>
-            </div>
-
-            <div class="qr-style-section">
-                <!-- Controles comunes (personalización) -->
-                <div class="qr-config-common">
-
-                    <EditForm Model="qrOptions">
-                        <div class="qr-card">
-
-                            <!-- 1a fila: Módulo + Ojo-Marco -->
-                            <div class="qr-row">
-                                <div class="qr-group-double">
-                                    <QrModuleShapeSelector SelectedShape="qrOptions.ModuleShape" SelectedShapeChanged="OnShapeChanged" SelectedColor="qrOptions.ModuleColor" SelectedColorChanged="OnColorShapeChanged" />
-                                </div>
-                            </div>
-
-                            <!-- 1a fila: Módulo + Ojo-Marco -->
-                            <div class="qr-row">
-                                <div class="qr-group-double">
-                                    <QrEyeFrameShapeSelector SelectedShape="qrOptions.EyeFrameShape"
-                                                                SelectedShapeChanged="OnFrameChanged"
-                                                                SelectedColor="qrOptions.EyeFrameColor"
-                                                                SelectedColorChanged="OnFrameColorChanged" />
-                                </div>
-                            </div>
-
-                            <!-- 2a fila: Ojo-Centro + Ojo-retro -->
-                            <div class="qr-row">
-                                <div class="qr-group-double">
-                                    <QrEyeCenterShapeSelector SelectedEyeShape="qrOptions.EyeCenterShape"
-                                                                SelectedEyeShapeChanged="OnCenterEyeChanged"
-                                                                SelectedEyeColor="qrOptions.EyeCenterColor"
-                                                                SelectedEyeColorChanged="OnCenterEyeColorChanged" />
-                                </div>
-                            </div>
-
-                            <!-- 3a fila: Corrección + Tamaño -->
-                            <div class="qr-row">
-                                <div class="qr-group-simple">
-                                    <label>
-                                        Corrección
-                                        <span class="custom-tooltip">
-                                            <svg width="18" height="18" style="vertical-align:middle;">
-                                                <circle cx="9" cy="9" r="9" fill="#23a6e8" />
-                                                <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
-                                            </svg>
-                                            <span class="custom-tooltip-text">Define cuánta información puede recuperar el QR si se daña o ensucia. Q es estándar, H es máximo.</span>
-                                        </span>
-                                    </label>
-                                    <InputSelect @bind-Value="qrOptions.CorrectionLevel" class="qr-input">
-                                        @foreach (var level in Enum.GetNames(typeof(QrCorrectionLevel)))
-                                        {
-                                            <option value="@level">@level</option>
-                                        }
-                                    </InputSelect>
-                                </div>
-                                <div class="qr-group-simple" style="display:none">
-                                    <label>
-                                        Tamaño
-                                        <span class="custom-tooltip">
-                                            <svg width="18" height="18" style="vertical-align:middle;">
-                                                <circle cx="9" cy="9" r="9" fill="#23a6e8" />
-                                                <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
-                                            </svg>
-                                            <span class="custom-tooltip-text"> Tamaño en píxeles del QR generado. </span>
-                                        </span>
-                                    </label>
-                                    <InputNumber @bind-Value="qrOptions.Size" min="128" max="1024" class="qr-input" />
-                                </div>
-                                <div class="qr-group-simple">
-                                    <label>
-                                        Calidad
-                                        <span class="custom-tooltip">
-                                            <svg width="18" height="18" style="vertical-align:middle;">
-                                                <circle cx="9" cy="9" r="9" fill="#23a6e8" />
-                                                <text x="9" y="14" text-anchor="middle" font-size="14" fill="#fff">?</text>
-                                            </svg>
-                                            <span class="custom-tooltip-text">Entre mayor calidad, el código QR se verá más nítido al exportar o imprimir.</span>
-                                        </span>
-                                    </label>
-                                    <div class="quality-slider-wrap">
-                                        <button @onclick="DecrementQuality" class="icon-btn">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <input type="range"
-                                                min="0" max="4" step="1"
-                                                @onmousedown="@(() => isSliderActive = true)"
-                                                @onmouseup="@(() => isSliderActive = false)"
-                                                @onmouseleave="@(() => isSliderActive = false)"
-                                                class="quality-slider slider @(isSliderActive ? "engranaje-activo" : "")"
-                                                @bind="Quality" />
-                                        <button @onclick="IncrementQuality" class="icon-btn">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                    <div class="text-center fw-bold quality-desc">
-                                            @(Quality switch
-                                        {
-                                            0 => "Básica",
-                                            1 => "Normal",
-                                            2 => "Buena",
-                                            3 => "Alta",
-                                            4 => "Excelente",
-                                            _ => "Custom"
-                                        })
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- 4a fila: Calidad + Logo -->
-                            <div class="qr-row">
+                                <!-- 4a fila: Calidad + Logo -->
+                                <div class="qr-row">
                                 
-                                <div class="qr-group-simple">
-                                    <label>Logo central</label>
-                                    <InputFile OnChange="OnLogoChanged" class="qr-file" />
-                                    @* @if (!string.IsNullOrEmpty(logoPreviewUrl))
-                                    {
-                                        <div style="margin-top:5px;">
-                                            <img src="@logoPreviewUrl" alt="Preview logo" style="max-width:70px;max-height:70px;border-radius:12px;border:1px solid #eee;" />
-                                        </div>
-                                        <div style="font-size:0.9em;color:#666;">@logoFileName</div>
-                                    } *@
+                                    <div class="qr-group-simple inputFile">
+                                        <label>Logo central</label>
+                                        <InputFile OnChange="OnLogoChanged" class="qr-file " />
+                                        @* @if (!string.IsNullOrEmpty(logoPreviewUrl))
+                                        {
+                                            <div style="margin-top:5px;">
+                                                <img src="@logoPreviewUrl" alt="Preview logo" style="max-width:70px;max-height:70px;border-radius:12px;border:1px solid #eee;" />
+                                            </div>
+                                            <div style="font-size:0.9em;color:#666;">@logoFileName</div>
+                                        } *@
 
-                                    @if (!string.IsNullOrEmpty(logoError))
-                                    {
-                                        <div style="color: #d8000c; background: #ffbaba; border-radius: 5px; padding: 6px 12px; margin-top: 6px;">
-                                            @logoError
-                                        </div>
-                                    }
+                                        @if (!string.IsNullOrEmpty(logoError))
+                                        {
+                                            <div style="color: #d8000c; background: #ffbaba; border-radius: 5px; padding: 6px 12px; margin-top: 6px;">
+                                                @logoError
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
-                            </div>
 
-                        </div>
-                    </EditForm>
+                            </div>
+                        </EditForm>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="qr-preview-col">
-            <div class="qr-svg-container qr-box">
-                @if (isLoading)
-                {
-                    <div class="qr-loader-custom">
-                        <svg width="48" height="48" viewBox="0 0 40 40">
-                                <rect x="2" y="2" width="12" height="12" rx="3" fill="#27DEF2">
-                                <animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite" />
-                            </rect>
-                                <rect x="26" y="2" width="12" height="12" rx="3" fill="#27DEF2" opacity="0.7">
-                                <animate attributeName="opacity" values="0;1;0" begin="0.2s" dur="1s" repeatCount="indefinite" />
-                            </rect>
-                                <rect x="2" y="26" width="12" height="12" rx="3" fill="#27DEF2" opacity="0.5">
-                                <animate attributeName="opacity" values="0;1;0" begin="0.4s" dur="1s" repeatCount="indefinite" />
-                            </rect>
-                                <rect x="26" y="26" width="12" height="12" rx="3" fill="#27DEF2" opacity="0.9">
-                                <animate attributeName="opacity" values="0;1;0" begin="0.6s" dur="1s" repeatCount="indefinite" />
-                            </rect>
-                        </svg>
-                        <div class="loader-text">Generando QR…</div>
-                    </div>
-                }
-                @if (showToast)
-                {
-                    <div class="toast-over-qr">
-                        <span class="toast-icon">✔️</span> ¡QR generado exitosamente!
-                    </div>
-                }
-                <CustomQrCode QrOptions="qrOptions" OnSvgGenerated="GuardarQrSvgString" />
-                    
-            </div>
-            <div class="qr-actions mt-3">
-                @* <button class="btn btn-primary mt-3 ms-2" @onclick="DownloadSVG">Descargar SVG</button> *@
-                <div class="qr-actions d-flex flex-wrap gap-2">
-                    <button class="btn btn-main" @onclick="GenerateQr" title="Generar" disabled="@(!isInputValid)">
-                        <i class="fa fa-qrcode" aria-hidden="true"></i>Generar
-                    </button>
-                    <button class="btn btn-outline-secondary" @onclick="Limpiar" title="Limpiar campos" disabled="@(!isInputValid)">
-                        <i class="fa fa-eraser"></i> Limpiar
-                    </button>
-                    @* --- Zona de descarga rediseñada --- *@
-                    @* <div class="dropdown dropup" disabled="@(!isInputValid)">
-                        <button class="main-download-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-display="dynamic" disabled="@(!isInputValid)">
-                            <i class="fas fa-download"></i>
-                            Descargar
-                        </button>
-                        <div class="dropdown-menu">
-                            <button @onclick="DownloadPNG"><span class="icon">🖼️</span> PNG</button>
-                            <button @onclick="DownloadSVG"><span class="icon">🗂️</span> SVG</button>
-                            <button @onclick="DownloadPDF"><span class="icon">📄</span> PDF</button>
-                        </div>
-                    </div> *@
-                    @if (qrGenerado && isInputValid)
+            <div class="qr-preview-col">
+                <div class="qr-svg-container qr-box">
+                    @if (isLoading)
                     {
-                        <div class="dropdown dropup">
-                            <button class="main-download-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-display="dynamic">
+                        <div class="qr-loader-custom">
+                            <svg width="48" height="48" viewBox="0 0 40 40">
+                                    <rect x="2" y="2" width="12" height="12" rx="3" fill="#27DEF2">
+                                    <animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite" />
+                                </rect>
+                                    <rect x="26" y="2" width="12" height="12" rx="3" fill="#27DEF2" opacity="0.7">
+                                    <animate attributeName="opacity" values="0;1;0" begin="0.2s" dur="1s" repeatCount="indefinite" />
+                                </rect>
+                                    <rect x="2" y="26" width="12" height="12" rx="3" fill="#27DEF2" opacity="0.5">
+                                    <animate attributeName="opacity" values="0;1;0" begin="0.4s" dur="1s" repeatCount="indefinite" />
+                                </rect>
+                                    <rect x="26" y="26" width="12" height="12" rx="3" fill="#27DEF2" opacity="0.9">
+                                    <animate attributeName="opacity" values="0;1;0" begin="0.6s" dur="1s" repeatCount="indefinite" />
+                                </rect>
+                            </svg>
+                            <div class="loader-text">Generando QR…</div>
+                        </div>
+                    }
+                    @if (showToast)
+                    {
+                        <div class="toast-over-qr">
+                            <span class="toast-icon">✔️</span> ¡QR generado exitosamente!
+                        </div>
+                    }
+                    <CustomQrCode QrOptions="qrOptions" OnSvgGenerated="GuardarQrSvgString" />
+                    
+                </div>
+                <div class="qr-actions mt-3">
+                    @* <button class="btn btn-primary mt-3 ms-2" @onclick="DownloadSVG">Descargar SVG</button> *@
+                    <div class="qr-actions d-flex flex-wrap gap-2">
+                        <button class="btn btn-main" @onclick="GenerateQr" title="Generar" disabled="@(!isInputValid)">
+                            <i class="fa fa-qrcode" aria-hidden="true"></i>Generar
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="Limpiar" title="Limpiar campos" disabled="@(!isInputValid)">
+                            <i class="fa fa-eraser"></i> Limpiar
+                        </button>
+                        @* --- Zona de descarga rediseñada --- *@
+                        @* <div class="dropdown dropup" disabled="@(!isInputValid)">
+                            <button class="main-download-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-display="dynamic" disabled="@(!isInputValid)">
                                 <i class="fas fa-download"></i>
                                 Descargar
                             </button>
@@ -531,12 +563,36 @@
                                 <button @onclick="DownloadSVG"><span class="icon">🗂️</span> SVG</button>
                                 <button @onclick="DownloadPDF"><span class="icon">📄</span> PDF</button>
                             </div>
-                        </div>
-                    }
+                        </div> *@
+                        @if (qrGenerado && isInputValid)
+                        {
+                            <div class="dropdown dropup">
+                                <button class="main-download-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-display="dynamic">
+                                    <i class="fas fa-download"></i>
+                                    Descargar
+                                </button>
+                                <div class="dropdown-menu">
+                                    <button @onclick="DownloadPNG"><span class="icon">🖼️</span> PNG</button>
+                                    <button @onclick="DownloadSVG"><span class="icon">🗂️</span> SVG</button>
+                                    <button @onclick="DownloadPDF"><span class="icon">📄</span> PDF</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
-        </div>
+
+        <!-- Ubicación de anuncio -->
+        <ins class="adsbygoogle"
+             style="display:block; text-align:center;"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXX"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
 </div>
 
@@ -608,6 +664,7 @@
     // ===============================
     // Propiedades para binding y validación
     // ===============================
+    // private string linkUrl = "https://midominio.com";
     private string linkUrl;
     public string LinkUrl
     {
@@ -1028,7 +1085,7 @@
         }
     }
 
-
+    private string ExpandedSection = "Frame"; // o "Center"
     private bool ShowTooltip { get; set; }
     private bool showAllTypes = false;
     private int visibleTypesCount = 10; // Ajusta según tu diseño
@@ -1099,13 +1156,20 @@
     }
 
     /*Personalizacion*/
+    private bool CenterIsFixed =>
+    qrOptions != null &&
+    FrameRequiresFixedCenter.TryGetValue(qrOptions.EyeFrameShape, out var fixedCenter) &&
+    fixedCenter;
+
+    private readonly List<EyeCenterShape> AllEyeCenterShapes = Enum.GetValues<EyeCenterShape>().ToList();
+
 
     // Variables para mostrar QR
     public string Content { get; set; } = "https://midominio.com";
     public int Size => CalcularTamañoPorVentana(windowWidth);
     private int Quality { get; set; } = 2; // Valor inicial por defecto
 
-
+    private string expandedSection = ""; // Puede ser "frame", "center", o ""
     private int windowWidth; // Default inicial
 
     // Campos privados de backing
@@ -1164,6 +1228,8 @@
 
     private bool showToast = false;
     private System.Threading.Timer? toastTimer;
+    private bool showToastColor = false;
+    private string toastMessage;
 
     private bool isLoading = false;
 
@@ -1207,9 +1273,19 @@
     private async Task GenerateQr()
     {
         qrGenerado = false;
+
+        var colorM = qrOptions.ModuleColor;     // Ejemplo: "#000000"
+        var colorF = qrOptions.BgColor; // Ejemplo: "#FFFFFF"
+
+        if (!Utils.ColorUtils.IsContrastAccessible(colorM, colorF))
+        {
+            showToastColor = true;
+            toastMessage = "El contraste entre el color de fondo y el código es muy bajo.";
+            return;
+        }
+
         isLoading = true;
         StateHasChanged();
-
         errorMsg = "";
         isInputValid = false;
 
@@ -1291,6 +1367,7 @@
 
             // Esto fuerza la actualización del QR generado
             //StateHasChanged();
+            showToastColor = false;
             await Task.Delay(1500); // Simulación, reemplaza por tu lógica real
             ShowToast();
         }
@@ -1379,9 +1456,9 @@
     {
         // Si es Leaf o Diamond: solo ellos + Circle
         if (marco == EyeFrameShape.Leaf)
-            return new List<EyeCenterShape> { EyeCenterShape.Leaf, EyeCenterShape.Circle };
+            return new List<EyeCenterShape> { EyeCenterShape.Leaf };
         if (marco == EyeFrameShape.Diamond)
-            return new List<EyeCenterShape> { EyeCenterShape.Diamond, EyeCenterShape.Circle };
+            return new List<EyeCenterShape> { EyeCenterShape.Diamond };
         // Para el resto, todas las opciones
         return Enum.GetValues(typeof(EyeCenterShape)).Cast<EyeCenterShape>().ToList();
     }
@@ -1407,7 +1484,6 @@
         /*Sin librerias externas*/
         await JS.InvokeVoidAsync("downloadSvgNative", QrSvgString, "codigoQR.svg");
     }
-
 
     // PNG (usa canvg en JS)
     private async Task DownloadPNG()
@@ -1435,12 +1511,36 @@
 
     private void OnColorShapeChanged(string newValue)
     {
-        qrOptions.ModuleColor = newValue;
+        var colorM = newValue;     // Ejemplo: "#000000"
+        var colorF = qrOptions.BgColor; // Ejemplo: "#FFFFFF"
+        if (!Utils.ColorUtils.IsContrastAccessible(colorM, colorF))
+        {
+            showToastColor = true;
+            toastMessage = "El contraste entre el color de fondo y el código es muy bajo.";
+            return;
+        }
+        else
+        {
+            qrOptions.ModuleColor = newValue;
+            toastMessage = string.Empty;
+            showToastColor = false;
+        }
     }
 
     private void OnFrameChanged(string newValue)
     {
+        //qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(newValue);
+
         qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(newValue);
+
+        // Validar centro
+        var allowed = GetAllowedCenters(qrOptions.EyeFrameShape);
+        if (!allowed.Contains(qrOptions.EyeCenterShape))
+        {
+            qrOptions.EyeCenterShape = allowed.First();
+        }
+
+        AllowedCenters = allowed;
     }
 
     private void OnFrameColorChanged(string newValue)
@@ -1491,7 +1591,6 @@
         }, null, 2000, System.Threading.Timeout.Infinite);
         StateHasChanged();
     }
-
 
     private void IncrementQuality()
     {
@@ -1623,7 +1722,6 @@
         ShowTooltip = false;
     }
 
-
     [JSInvokable]
     public void UpdateScreenWidth(int width)
     {
@@ -1645,4 +1743,35 @@
         else
             visibleTypesCount = 10;
     }
+
+    private void ToggleSection(string section)
+    {
+        ExpandedSection = ExpandedSection == section ? null : section;
+    }
+
+
+    private readonly Dictionary<EyeFrameShape, bool> FrameRequiresFixedCenter = new()
+    {
+        { EyeFrameShape.Leaf, true },
+        { EyeFrameShape.Diamond, true },
+        { EyeFrameShape.CircleInSquare, false },
+        { EyeFrameShape.CornerRoundOut, false },
+        { EyeFrameShape.CornerRect, false },
+        { EyeFrameShape.TwoCornerRect, false },
+        { EyeFrameShape.CornerRectRadio, false },
+        { EyeFrameShape.TwoCornerRectIn, false },
+    };
+
+    private bool isSidebarOpen = false;
+
+    private void ToggleSidebar()
+    {
+        isSidebarOpen = !isSidebarOpen;
+    }
+
+    // private List<EyeCenterShape> GetAllowedCenters()
+    // {
+    //     return CenterIsFixed ? new List<EyeCenterShape> { qrOptions.EyeCenterShape } : AllEyeCenterShapes;
+    // }
+
 }

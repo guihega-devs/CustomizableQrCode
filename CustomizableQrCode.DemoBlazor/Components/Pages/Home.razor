@@ -6,21 +6,38 @@
 @using Microsoft.AspNetCore.Components.Forms
 
 @page "/"
-
+@* <PageTitle>QrBox</PageTitle> *@
 @* <h3>Personaliza tu Código QR</h3> *@
 
 <main class="container-mint">
-    <div class="card-mint" id="qrForm">
-        <QrCompGenerator InitialContent="https://midominio.com" OnQrGenerated="OnQrReady" />
-    </div>
+    @* Controla el estado de visibilidad *@
+    @if (showWelcome)
+    {
+        <BienvenidaComponent OnClose="CerrarBienvenida" />
+
+    }
+    else
+    {
+        <div class="card-mint" id="qrForm">
+            <QrCompGenerator InitialContent="https://midominio.com" OnQrGenerated="OnQrReady" />
+        </div>
+    }
+
 </main>
 
 @code {
     private string tipoQrSeleccionado = "Link";
+    private bool showWelcome = true;
 
     void OnQrReady(string qrImageUrl)
     {
         // Puedes hacer algo cuando se genere el QR
     }
 
+
+    private void CerrarBienvenida()
+    {
+        showWelcome = false;
+        StateHasChanged();
+    }
 }
