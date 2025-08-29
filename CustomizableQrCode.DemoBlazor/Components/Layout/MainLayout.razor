@@ -4,62 +4,76 @@
       media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/.../bootstrap-icons.min.css"></noscript>
 
+<header class="main-header glass-header" role="banner">
+    <div class="header-content">
+        <!-- Logo -->
+        <a href="/" class="logo" aria-label="Ir al inicio">
+            <img src="/img/logo/QrBoxLogoBco.webp"
+                 class="img-responsive"
+                 width="120" height="80"
+                 alt="Logo QRBox"
+                 fetchpriority="high"
+                 loading="eager" />
+        </a>
 
-<header class="main-header">
-        <div class="header-content">
-            <a href="/" class="logo" aria-label="Ir al inicio">
-                @* <img class="img-responsive"
-                 src="/img/logo/qrboxlogobco.webp"
-                 srcset="/img/logo/qrboxlogobco-480.webp 480w, /img/logo/qrboxlogobco.webp 1024w"
-                  sizes="(max-width: 600px) 120px, 180px"
-                  width="120"
-                  height="120"
-                  alt="Generador de Códigos"
-                  fetchpriority="high"
-                  loading="eager"
-                /> *@
-                <img src="/img/logo/QrBoxLogoBco.webp"
-                class="img-responsive"
-                 width="120"
-                 height="80"
-                 style="max-width: 120px; height: auto;"
-                 alt="Logo QRBox" 
-                  fetchpriority="high"
-                  loading="eager"/>
-            </a>
-            <!-- Burger con aria -->
-            <button class="burger" id="burgerBtn" aria-label="Menú" aria-expanded="false" aria-controls="navMenu">&#9776;</button>
+        <!-- Menú desktop -->
+        <nav class="nav-menu" role="navigation" aria-label="Menú principal (desktop)">
+            <a href="/">Inicio</a>
+            <a href="/privacidad">Privacidad</a>
+            <a href="/terminos">Términos</a>
+            <a href="/contacto" class="btn-nav">Contacto</a>
+        </nav>
 
-            <nav class="nav-menu" id="navMenu" aria-label="Menú principal">
-                @* <a href="/counter">Generar QR</a> *@
-                <a href="/privacidad">Política de privacidad</a>
-                <a href="/terminos">Términos y condiciones</a>
-                <a href="/contacto">Contacto</a>
-                @* <a href="/terminos" class="cta-btn-blue">Términos y condiciones</a>
-                <a href="/contacto" class="cta-btn-outline">Contacto</a> *@
-            </nav>
-        </div>
-    </header>
-    <div class="header-shadow-blue"></div>
-    @Body
+        <!-- Botón burger -->
+        <button class="burger" id="burgerBtn" aria-label="Abrir menú móvil" aria-expanded="false" aria-controls="mobileMenu">
+            &#9776;
+        </button>
+    </div>
 
-
-<footer class="footer-mint">
-    <p class="footer-text">
-        © 2024 <strong>QRBox</strong>
-    </p>
-    <div class="footer-links">
+    <!-- Menú móvil -->
+    <nav class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Menú principal (móvil)" aria-hidden="true">
+        <button class="close-btn" id="closeMenuBtn" aria-label="Cerrar menú">&times;</button>
+        <a href="/">Inicio</a>
+        <a href="/precios">Precios</a>
+        <a href="/ayuda">Ayuda</a>
         <a href="/contacto">Contacto</a>
-        <span class="divider">|</span>
-        <a href="/privacidad">Política de privacidad</a>
-        <span class="divider">|</span>
-        <a href="/terminos">Términos y condiciones</a>
+    </nav>
+
+    <!-- Overlay -->
+    <div class="menu-overlay" id="menuOverlay" aria-hidden="true"></div>
+</header>
+
+<div class="header-shadow-blue"></div>
+
+<main class="main-body" role="main">
+
+    <!-- Hero Section -->
+@*     <section class="hero">
+        <div class="hero-content">
+            <h1>Genera Códigos QR Personalizados</h1>
+            <p>Gratis, rápidos y en múltiples formatos (PNG, SVG, PDF).</p>
+            <a href="/generador" class="btn-cta">Comenzar ahora</a>
+        </div>
+    </section> *@
+    @Body
+</main>
+
+<footer class="main-footer glass-footer" role="contentinfo">
+    <div class="footer-container">
+        <p class="footer-text">© 2024 <strong>QRBox</strong></p>
+        <div class="footer-links">
+            <a href="/contacto">Contacto</a>
+            <span class="divider">|</span>
+            <a href="/privacidad">Política de privacidad</a>
+            <span class="divider">|</span>
+            <a href="/terminos">Términos y condiciones</a>
+        </div>
     </div>
 </footer>
 
 
-<div id="blazor-error-ui" data-nosnippet>
+@* <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
-</div>
+</div> *@

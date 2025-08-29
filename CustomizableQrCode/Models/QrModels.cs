@@ -9,7 +9,25 @@ namespace CustomizableQrCode.Models
 {
     public static class QrModels
     {
-        public enum ModuleShape { Square, Circle, Hexagon }
+        public enum ModuleShape { Square, Circle, Hexagon, Outline,
+            // ✨ Nuevos estilos
+            Heart,        // corazones ❤️
+            Star,         // estrellas ⭐
+            Diamond,      // rombos ♦
+            VerticalBar,  // barras verticales ▌
+            HorizontalBar,// barras horizontales ▃
+            Block,        // bloques cuadrados con padding
+            Triangle,
+            Cross,
+            Teardrop,
+            Wave,
+            Flower,
+            PixelBurst,
+            Infinity,
+            Snowflake,
+            Arrow,
+            DotGrid // 👈 nuevo estilo “orgánico”
+        }
         public enum EyeShape { Square, Circle, Diamond }
         public enum QrExportFormat { Svg, Png, Jpg }
         public enum QrCorrectionLevel { L, M, Q, H }
@@ -43,7 +61,7 @@ namespace CustomizableQrCode.Models
     // QrModels.cs
     public class QrCodeOptions
     {
-        public string Content { get; set; } = "https://midominio.com";
+        public string Content { get; set; } = "https://qrbox.com.mx/";
         public ModuleShape ModuleShape { get; set; } = ModuleShape.Square;
 
         // Ojo - marco (borde)
@@ -76,4 +94,20 @@ namespace CustomizableQrCode.Models
         public string Label { get; set; }
         public double Angle { get; set; }
     }
+
+    public class QrState
+    {
+        public QrCodeOptions Options { get; private set; } = new();
+
+        public event Action OnChange;
+
+        public void UpdateOptions(QrCodeOptions options)
+        {
+            Options = options;
+            NotifyStateChanged();
+        }
+
+        private void NotifyStateChanged() => OnChange?.Invoke();
+    }
+
 }
