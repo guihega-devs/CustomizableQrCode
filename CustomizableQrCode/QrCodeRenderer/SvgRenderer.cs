@@ -165,9 +165,9 @@ namespace CustomizableQrCode.QrCodeRenderer
                         //case ModuleShape.Rounded:
                         //    sb.AppendLine($"<rect x='{px}' y='{py}' width='{moduleSize}' height='{moduleSize}' rx='{moduleSize * 0.4}' fill='{moduleColor}'/>");
                         //    break;
-                        case ModuleShape.Outline:
-                            sb.AppendLine($"<rect x='{px}' y='{py}' width='{moduleSize}' height='{moduleSize}' fill='none' stroke='{moduleColor}' stroke-width='{moduleSize * 0.2}'/>");
-                            break;
+                        //case ModuleShape.Outline:
+                        //    sb.AppendLine($"<rect x='{px}' y='{py}' width='{moduleSize}' height='{moduleSize}' fill='none' stroke='{moduleColor}' stroke-width='{moduleSize * 0.2}'/>");
+                        //    break;
                         case ModuleShape.Heart:
                             sb.AppendLine($"<path d='M{px + moduleSize / 2},{py + moduleSize / 4} " +
                                 $"C{px},{py - moduleSize / 4} {px - moduleSize / 2},{py + moduleSize / 2} {px + moduleSize / 2},{py + moduleSize} " +
@@ -216,16 +216,16 @@ namespace CustomizableQrCode.QrCodeRenderer
                         case ModuleShape.PixelBurst:
                             sb.AppendLine(DrawPixelBurst(px, py, moduleSize, moduleColor));
                             break;
-                        case ModuleShape.Infinity:
-                            sb.AppendLine(DrawInfinity(px, py, moduleSize, moduleColor));
-                            break;
+                        //case ModuleShape.Infinity:
+                        //    sb.AppendLine(DrawInfinity(px, py, moduleSize, moduleColor));
+                        //    break;
                         case ModuleShape.Snowflake:
                             sb.AppendLine(DrawSnowflake(px, py, moduleSize, moduleColor));
                             break;
-                        case ModuleShape.Arrow:
-                            //sb.AppendLine(DrawArrow(px, py, moduleSize, moduleColor));
-                            sb.AppendLine($"<g transform='rotate(90,{px},{py})'>{DrawArrow(px, py, moduleSize, moduleColor)}</g>");
-                            break;
+                        //case ModuleShape.Arrow:
+                        //    //sb.AppendLine(DrawArrow(px, py, moduleSize, moduleColor));
+                        //    sb.AppendLine($"<g transform='rotate(90,{px},{py})'>{DrawArrow(px, py, moduleSize, moduleColor)}</g>");
+                        //    break;
                         case ModuleShape.DotGrid:
                             sb.AppendLine(DrawDotGrid(px, py, moduleSize, moduleColor));
                             break;

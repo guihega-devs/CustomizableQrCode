@@ -9,8 +9,8 @@ namespace CustomizableQrCode.Models
 {
     public static class QrModels
     {
-        public enum ModuleShape { Square, Circle, Hexagon, Outline,
-            // ✨ Nuevos estilos
+        public enum ModuleShape { Square, Circle, Hexagon,
+            //Outline,
             Heart,        // corazones ❤️
             Star,         // estrellas ⭐
             Diamond,      // rombos ♦
@@ -23,9 +23,9 @@ namespace CustomizableQrCode.Models
             Wave,
             Flower,
             PixelBurst,
-            Infinity,
+            //Infinity,
             Snowflake,
-            Arrow,
+            //Arrow,
             DotGrid // 👈 nuevo estilo “orgánico”
         }
         public enum EyeShape { Square, Circle, Diamond }
@@ -65,18 +65,18 @@ namespace CustomizableQrCode.Models
         public ModuleShape ModuleShape { get; set; } = ModuleShape.Square;
 
         // Ojo - marco (borde)
-        public EyeFrameShape EyeFrameShape { get; set; } = EyeFrameShape.Square;
-        public string EyeFrameColor { get; set; } = "#000000";
+        public EyeFrameShape EyeFrameShape { get; set; } = EyeFrameShape.Rounded;
+        public string EyeFrameColor { get; set; } = "#0FBF9F";
 
         // Ojo - centro
-        public EyeCenterShape EyeCenterShape { get; set; } = EyeCenterShape.Square;
-        public string EyeCenterColor { get; set; } = "#000000";
+        public EyeCenterShape EyeCenterShape { get; set; } = EyeCenterShape.Rounded;
+        public string EyeCenterColor { get; set; } = "#0FBF9F";
 
         // --- COMPATIBILIDAD RETRO ---
         public EyeShape EyeShape { get; set; } = EyeShape.Square; // <= agrega esto
-        public string EyeColor { get; set; } = "#000000";          // <= agrega esto
+        public string EyeColor { get; set; } = "#0FBF9F";          // <= agrega esto
 
-        public string ModuleColor { get; set; } = "#4B93F2";
+        public string ModuleColor { get; set; } = "#0FBF9F";
         public string BgColor { get; set; } = "#f7f7f7";
 
         public QrCorrectionLevel CorrectionLevel { get; set; } = QrCorrectionLevel.Q;

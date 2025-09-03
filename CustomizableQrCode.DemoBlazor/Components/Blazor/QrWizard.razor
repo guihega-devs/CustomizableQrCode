@@ -19,11 +19,6 @@
             <div class="step-circle">2</div>
             <div class="step-label">Personaliza</div>
         </div>
-        <div class="step-line"></div>
-        <div class="step @(CurrentStep == 3 ? "active" : (CurrentStep > 3 ? "completed" : ""))">
-            <div class="step-circle">3</div>
-            <div class="step-label">Descarga</div>
-        </div>
     </div>
 
     <!-- Breadcrumb visual -->
@@ -55,7 +50,17 @@
         <!-- Paso 2: Personalización -->
         @if (CurrentStep == 2)
         {
-            <h2 class="step-title">Paso 2 - Personalización</h2>
+            <div class="step-header">
+                <h2 class="step-title">Paso 2 - Personalización</h2>
+
+                @if (SelectedType.HasValue)
+                {
+                    <div class="qr-selected-type-label">
+                        <i class="@SelectedOption?.Icon"></i>
+                        <span>@SelectedOption?.Label</span>
+                    </div>
+                }
+            </div>
 
             <div class="qr-accordion">
 
@@ -360,13 +365,6 @@
                                                @oninput="(e) => OnTempModuleColorChanged(e.Value?.ToString())"
                                                @onchange="ApplyModuleColor"
                                                class="qr-color-picker" />
-
-                                        @if (showToastColor)
-                                        {
-                                            <div class="qr-toast-warning">
-                                                @toastMessage
-                                            </div>
-                                        }
                                     </div>
                                 }
                                 else if (activeTab == "marco")
@@ -448,6 +446,14 @@
                                 }
 
                             </div>
+
+
+                            @if (showToastColor)
+                            {
+                                <div class="qr-toast-warning">
+                                    @toastMessage
+                                </div>
+                            }
                         </EditForm>
                     </div>
                 </div>
@@ -456,7 +462,10 @@
                     <button class="btn btn-back" @onclick="PrevStep">
                         <i class="fas fa-arrow-left"></i> Atrás
                     </button>
-                    <button class="btn btn-generate" @onclick="GenerateQr">
+                    @* <button class="btn btn-generate" @onclick="GenerateQr">
+                        <i class="fas fa-qrcode"></i> Generar QR
+                    </button> *@
+                    <button class="btn btn-generate" @onclick="GenerateQr" disabled="@(isLoading || !isInputValid)">
                         <i class="fas fa-qrcode"></i> Generar QR
                     </button>
                 </div>
@@ -572,7 +581,15 @@
             {
                 linkUrl = value;
                 ValidateInputs();
-                UpdateOptions(); //
+                if (isInputValid)
+                {
+                    UpdateOptions(); // solo actualiza QR si el contenido es válido
+                }
+                else
+                {
+                    qrOptions.Content = string.Empty; // limpia el contenido del QR inválido
+                    StateHasChanged(); // fuerza refresco de error
+                }
             }
         }
     }
@@ -1189,6 +1206,17 @@
 
     private async Task GenerateQr()
     {
+        ValidateInputs();
+
+        if (!isInputValid)
+        {
+            //showToastColor = true;
+            toastMessage = errorMsg ?? "⚠️ Los datos ingresados no son válidos.";
+            ShowDesignError(toastMessage);
+            StateHasChanged();
+            return;
+        }
+
         qrGenerado = false;
 
         var colorM = qrOptions.ModuleColor;     // Ejemplo: "#000000"
@@ -1196,8 +1224,9 @@
 
         if (!Utils.ColorUtils.IsContrastAccessible(colorM, colorF))
         {
-            showToastColor = true;
+            //showToastColor = true;
             toastMessage = "El contraste entre el color de fondo y el código es muy bajo.";
+            ShowDesignError(toastMessage);
             return;
         }
 
@@ -1208,26 +1237,28 @@
 
         try
         {
-            // ✅ Aquí usamos el nuevo método
-            qrOptions.Content = BuildQrContent();
+            // // ✅ Aquí usamos el nuevo método
+            // qrOptions.Content = BuildQrContent();
 
-            // --- Aquí puedes actualizar cualquier otro campo de qrOptions si fuera necesario ---
-            qrOptions.ModuleShape = Enum.Parse<ModuleShape>(qrOptions.ModuleShape.ToString());
-            qrOptions.ModuleColor = qrOptions.ModuleColor;
-            qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(qrOptions.EyeFrameShape.ToString());
-            qrOptions.EyeFrameColor = qrOptions.EyeFrameColor;
-            qrOptions.EyeCenterShape = Enum.Parse<EyeCenterShape>(qrOptions.EyeCenterShape.ToString());
-            qrOptions.EyeCenterColor = qrOptions.EyeCenterColor;
-            qrOptions.BgColor = qrOptions.BgColor;
-            qrOptions.CorrectionLevel = qrOptions.CorrectionLevel;
-            qrOptions.Size = qrOptions.Size;
-            qrOptions.Quality = qrOptions.Quality;
-            qrOptions.LogoBase64 = qrOptions.LogoBase64;
+            // // --- Aquí puedes actualizar cualquier otro campo de qrOptions si fuera necesario ---
+            // qrOptions.ModuleShape = Enum.Parse<ModuleShape>(qrOptions.ModuleShape.ToString());
+            // qrOptions.ModuleColor = qrOptions.ModuleColor;
+            // qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(qrOptions.EyeFrameShape.ToString());
+            // qrOptions.EyeFrameColor = qrOptions.EyeFrameColor;
+            // qrOptions.EyeCenterShape = Enum.Parse<EyeCenterShape>(qrOptions.EyeCenterShape.ToString());
+            // qrOptions.EyeCenterColor = qrOptions.EyeCenterColor;
+            // qrOptions.BgColor = qrOptions.BgColor;
+            // qrOptions.CorrectionLevel = qrOptions.CorrectionLevel;
+            // qrOptions.Size = qrOptions.Size;
+            // qrOptions.Quality = qrOptions.Quality;
+            // qrOptions.LogoBase64 = qrOptions.LogoBase64;
+
+            UpdateOptions();
 
             if (OnOptionsChanged.HasDelegate)
                 await OnOptionsChanged.InvokeAsync(qrOptions);
 
-            isInputValid = true;
+            //isInputValid = true;
             qrGenerado = true;
 
             // Esto fuerza la actualización del QR generado
@@ -1248,7 +1279,22 @@
 
     private async void UpdateOptions()
     {
-        qrOptions.Content = BuildQrContent();
+        var content = BuildQrContent();
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            ShowDesignError("⚠️ Ingresa primero los datos del QR antes de personalizar el diseño.");
+            // No actualizamos el QR si no hay contenido válido
+            return;
+        }
+        else
+        {
+            HideDesignError();
+        }
+
+        // ✅ Si hay contenido válido, lo asignamos
+        qrOptions.Content = content;
+
         qrOptions.ModuleShape = Enum.Parse<ModuleShape>(qrOptions.ModuleShape.ToString());
         qrOptions.ModuleColor = qrOptions.ModuleColor;
         qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(qrOptions.EyeFrameShape.ToString());
@@ -1265,30 +1311,29 @@
             await OnOptionsChanged.InvokeAsync(qrOptions);
     }
 
-
-
     private string BuildQrContent()
     {
         return SelectedType switch
         {
-            QrContentType.Link => LinkUrl,
-            QrContentType.Text => TextContent,
-            QrContentType.Email => $"mailto:{EmailTo}?subject={Uri.EscapeDataString(EmailSubject)}&body={Uri.EscapeDataString(EmailBody)}",
-            QrContentType.Call => $"tel:{Phone}",
-            QrContentType.SMS => $"sms:{SmsPhone}?body={Uri.EscapeDataString(SmsMessage)}",
-            QrContentType.VCard => BuildVCard(),
-            QrContentType.WhatsApp => $"https://wa.me/{WhatsAppPhone}{(string.IsNullOrWhiteSpace(WhatsAppMessage) ? "" : $"?text={Uri.EscapeDataString(WhatsAppMessage)}")}",
-            QrContentType.WiFi => $"WIFI:T:{WiFiEncryption};S:{WiFiSSID};P:{WiFiPassword};;",
-            QrContentType.PDF => PdfUrl,
-            QrContentType.App => AppUrl,
-            QrContentType.Images => ImageUrl,
-            QrContentType.Video => VideoUrl,
-            QrContentType.SocialMedia => SocialUrl,
-            QrContentType.Event => BuildEvent(),
-            QrContentType.Barcode2D => Barcode2DContent,
-            _ => Content,
+            QrContentType.Link => QrContentBuilder.BuildLink(LinkUrl),
+            QrContentType.Text => QrContentBuilder.BuildText(TextContent),
+            QrContentType.Email => QrContentBuilder.BuildEmail(EmailTo, EmailSubject, EmailBody),
+            QrContentType.Call => QrContentBuilder.BuildCall(Phone),
+            QrContentType.SMS => QrContentBuilder.BuildSMS(SmsPhone, SmsMessage),
+            QrContentType.VCard => QrContentBuilder.BuildVCard(VCardFirstName, VCardLastName, Phone, EmailTo, VCardCompany, VCardJob, VCardAddress),
+            QrContentType.WhatsApp => QrContentBuilder.BuildWhatsApp(WhatsAppPhone, WhatsAppMessage),
+            QrContentType.WiFi => QrContentBuilder.BuildWiFi(WiFiSSID, WiFiPassword, WiFiEncryption),
+            QrContentType.PDF => QrContentBuilder.BuildPDF(PdfUrl),
+            QrContentType.App => QrContentBuilder.BuildApp(AppUrl),
+            QrContentType.Images => QrContentBuilder.BuildImage(ImageUrl),
+            QrContentType.Video => QrContentBuilder.BuildVideo(VideoUrl),
+            QrContentType.SocialMedia => QrContentBuilder.BuildSocial(SocialUrl),
+            QrContentType.Event => QrContentBuilder.BuildEvent(EventTitle, EventLocation, EventStart, EventEnd),
+            QrContentType.Barcode2D => QrContentBuilder.BuildBarcode2D(Barcode2DContent),
+            _ => Content ?? string.Empty,
         };
     }
+
 
     public async Task OnLogoChanged(InputFileChangeEventArgs e)
     {
@@ -1415,6 +1460,16 @@
 
     private void OnShapeChanged(string newValue)
     {
+        if (!HasValidContent())
+        {
+            ShowDesignError("⚠️ Ingresa primero los datos del QR antes de personalizar el diseño.");
+            return;
+        }
+        else
+        {
+            HideDesignError();
+        }
+
         qrOptions.ModuleShape = Enum.Parse<ModuleShape>(newValue);
         UpdateOptions(); // 👈 actualiza vista previa
     }
@@ -1445,7 +1500,8 @@
             //qrOptions.ModuleColor = suggested;
             tempModuleColor = suggested; // 👈 solo guardamos el valor temporal
             toastMessage = $"El color elegido tenía bajo contraste. Se ajustó automáticamente a {suggested}.";
-            showToastColor = true;
+            ShowDesignError(toastMessage);
+            //showToastColor = true;
         }
         else
         {
@@ -1461,21 +1517,18 @@
     // 🔹 Cuando confirma (da Aceptar en el selector)
     private void ApplyModuleColor(ChangeEventArgs e)
     {
+        if (!HasValidContent())
+        {
+            ShowDesignError("⚠️ Ingresa primero los datos del QR antes de aplicar colores.");
+            return;
+        }
+        else
+        {
+            HideDesignError();
+        }
+
         var newColor = e.Value?.ToString();
         var bgColor = qrOptions.BgColor ?? "#FFFFFF";
-
-        // 🔹 Cancelación (no cambia nada)
-        // if (string.IsNullOrWhiteSpace(newColor) || newColor == tempModuleColor)
-        // if (string.IsNullOrWhiteSpace(newColor) || newColor != tempModuleColor)
-        // {
-        //     qrOptions.ModuleColor = tempModuleColor; // restaurar valor previo
-        //     showToastColor = false;                  // 👈 forzar ocultar
-        //     toastMessage = string.Empty;
-
-        //     // 🔹 Truco para asegurar que la PRIMERA vez también desaparezca
-        //     InvokeAsync(StateHasChanged);
-        //     return;
-        // }
 
         // Caso 1: Cancelación explícita → no aplicar
         if (string.IsNullOrWhiteSpace(newColor))
@@ -1501,7 +1554,8 @@
             var suggested = ColorUtils.SuggestAccessibleColor(newColor, bgColor);
             qrOptions.ModuleColor = suggested;
             toastMessage = $"El color elegido tenía bajo contraste. Se ajustó automáticamente a {suggested}.";
-            showToastColor = true;
+            ShowDesignError(toastMessage);
+            //showToastColor = true;
         }
         else
         {
@@ -1518,6 +1572,16 @@
 
     private void OnFrameChanged(string newValue)
     {
+        if (!HasValidContent())
+        {
+            ShowDesignError("⚠️ Ingresa primero los datos del QR antes de cambiar el marco.");
+            return;
+        }
+        else
+        {
+            HideDesignError();
+        }
+
         qrOptions.EyeFrameShape = Enum.Parse<EyeFrameShape>(newValue);
 
         // Validar centro
@@ -1541,6 +1605,16 @@
     // Solo se ejecuta si el usuario da "Aceptar"
     private void ApplyFrameColor(ChangeEventArgs e)
     {
+        if (!HasValidContent())
+        {
+            ShowDesignError("⚠️ Ingresa primero los datos del QR antes de aplicar colores al marco.");
+            return;
+        }
+        else
+        {
+            HideDesignError();
+        }
+
         var newColor = e.Value?.ToString();
         if (!string.IsNullOrWhiteSpace(newColor))
         {
@@ -1564,7 +1638,17 @@
 
     // Solo se ejecuta si el usuario da "Aceptar"
     private void ApplyCenterColor(ChangeEventArgs e)
-    {
+    {        
+        if (!HasValidContent())
+        {
+            ShowDesignError("⚠️ Ingresa primero los datos del QR antes de aplicar colores al centro.");
+            return;
+        }
+        else
+        {
+            HideDesignError();
+        }
+
         var newColor = e.Value?.ToString();
         if (!string.IsNullOrWhiteSpace(newColor))
         {
@@ -1808,6 +1892,16 @@
 
     private void OnCorrectionLevelChanged(ChangeEventArgs e)
     {
+        if (!HasValidContent())
+        {
+            ShowDesignError("⚠️ Ingresa primero los datos del QR antes de cambiar la corrección de error.");
+            return;
+        }
+        else
+        {
+            HideDesignError();
+        }
+
         if (Enum.TryParse<QrCorrectionLevel>(e.Value?.ToString(), out var newLevel))
         {
             qrOptions.CorrectionLevel = newLevel;
@@ -1818,6 +1912,16 @@
 
     private void OnQualityChanged(ChangeEventArgs e)
     {
+        if (!HasValidContent())
+        {
+            ShowDesignError("⚠️ Ingresa primero los datos del QR antes de cambiar la calidad.");
+            return;
+        }
+        else
+        {
+            HideDesignError();
+        }
+
         if (int.TryParse(e.Value?.ToString(), out var newQuality))
         {
             qrOptions.Quality = newQuality;
@@ -1844,4 +1948,24 @@
         debounceTimer?.Dispose();
     }
 
+
+    private bool HasValidContent()
+    {
+        return !string.IsNullOrWhiteSpace(qrOptions.Content);
+    }
+
+
+    private void ShowDesignError(string message)
+    {
+        toastMessage = message;
+        showToastColor = true;
+        StateHasChanged();
+    }
+
+    private void HideDesignError()
+    {
+        toastMessage = String.Empty;
+        showToastColor = false;
+        StateHasChanged();
+    }
 }

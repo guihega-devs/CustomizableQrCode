@@ -15,7 +15,7 @@
 /* ===== HEADER ===== */
 .main-header {
     background: var(--primary-color);
-    padding: 12px 40px;
+/*    padding: 12px 40px;*/
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -68,6 +68,7 @@
     text-decoration: none;
     font-weight: 600;
     position: relative;
+    padding: 6px 14px;
 }
 
 .nav-menu a::after {
@@ -86,16 +87,16 @@
 }
 
 .btn-nav {
-    background: var(--text-light);
-    color: var(--primary-color) !important;
+    /*background: var(--text-light);*/
+    color: var(--text-light) !important;
     padding: 6px 14px;
     border-radius: 20px;
 }
 
-.btn-nav:hover {
+/*.btn-nav:hover {
     background: var(--primary-color-hover);
     color: var(--text-light) !important;
-}
+}*/
 
 /* ===== BURGER (móvil) ===== */
 .burger {
@@ -216,9 +217,7 @@
 
 .hero-grid {
     display: grid;
-    /*grid-template-columns: 2fr 1fr;*/ /* 2 columnas iguales */
-    /*grid-template-columns: 1fr 400px;*/ /* cards ocupan todo lo que queda, preview fijo */
-    grid-template-columns: minmax(0, 1fr) 380px; /* preview fija en ~380px */
+    grid-template-columns: 3fr 1fr;
     gap: 1rem;
     max-width: 1200px;
     width: 100%;
@@ -233,8 +232,8 @@
     font-family: var(--font-primary);
     font-size: 2.8rem;
     font-weight: 700;
-/*        margin-top: 20px;*/
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    margin-top: 10px;
     position: relative;
     display: inline-block;
     background: linear-gradient(90deg, #fff, #e0fdfa);
@@ -384,25 +383,53 @@
 .qr-toast-warning {
     background-color: #fffae6;
     color: #8a6d3b;
-    padding: 10px;
-    border-left: 5px solid #f0ad4e;
-    border-radius: 4px;
-    font-size: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,.1)
+    padding: 12px;
+    margin: 8px 0;
+    /*    border-left: 5px solid #f0ad4e;*/
+    border-radius: 6px;
+    font-size: 13px;
+    box-shadow: 0 0 10px rgba(0,0,0,.1);
 }
+
+.error-msg {
+    background-color: #ffe5e5;
+    color: #d8000c;
+    padding: 12px;
+    margin: 8px 0;
+/*    border-left: 6px solid #d8000c;*/
+    border-radius: 6px;
+    font-size: 13px;
+    box-shadow: 0 2px 8px rgba(216, 0, 12, 0.25); /* sombra rojiza */
+}
+
+/* Animación para dar más notoriedad */
+@keyframes pulseError {
+    0% {
+        box-shadow: 0 0 8px rgba(216,0,12,0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 16px rgba(216,0,12,0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 8px rgba(216,0,12,0.5);
+    }
+}
+
 /* ==============================
    VISTA PREVIA DEL QR
    ============================== */
 .qr-preview-card {
-    background: #fff;
+/*    background: #fff;*/
     border-radius: 16px;
-    padding: 20px;
+    padding: 10px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     border: 1px solid #e5e7eb;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 40px auto 0;
+    margin: 20px auto 0;
     max-width: 420px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -421,12 +448,10 @@
 /* SVG QR */
 .qr-preview-card svg {
     display: block;
-    /*    max-width: 260px;
-max-height: 260px;*/
     width: auto;
     height: auto;
-    /*margin-bottom: 12px;*/
     margin: 0 auto 16px auto; /* más aire antes de botones */
+    border-radius:15%;
 }
 
 /* Título de la vista previa */
@@ -438,17 +463,12 @@ max-height: 260px;*/
     text-transform: uppercase;
     border-bottom: 1px solid #f1f1f1;
     padding-bottom: 6px;
-    color: var(--text-dark);
+    color: var(--text-light);
 }
 
 .qr-preview-card h4 i {
     font-size: 1.2rem;
-    color: var(--primary-color);
-}
-
-.qr-preview-card h4 i {
-    font-size: 1.2rem;
-    color: var(--primary-color);
+    color: var(--text-light);
 }
 
 
@@ -503,25 +523,36 @@ max-height: 260px;*/
     font-weight: 600;
     letter-spacing: 0.2px;
 }
-
-.download-buttons button.png {
-    background: #3b82f6; /* Azul */
-}
-
-.download-buttons button.svg {
-    background: #eab308; /* Amarillo */
-    color: #000;
-}
-
-.download-buttons button.pdf {
-    background: #ef4444; /* Rojo */
-}
-
 .download-buttons button:hover {
-    opacity: 0.9;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    filter: brightness(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+/* PNG (azul del sitio) */
+.download-buttons .png {
+    background: var(--secondary-color);
+}
+
+.download-buttons .png:hover {
+    background: var(--secondary-color-hover);
+}
+
+/* SVG (verde del sitio) */
+.download-buttons .svg {
+    background: var(--primary-color);
+}
+
+.download-buttons .svg:hover {
+    background: var(--primary-color-hover);
+}
+
+/* PDF (rojo suave, consistente) */
+.download-buttons .pdf {
+    background: #ef4444;
+}
+
+.download-buttons .pdf:hover {
+    background: #dc2626;
 }
 
 /* ===== FOOTER ===== */
@@ -651,7 +682,7 @@ max-height: 260px;*/
 /* Body */
 .qr-accordion-body {
     max-height: 0;
-    overflow: hidden;(max-width: 1023px) and (min-width: 768px)
+    overflow: hidden;
     transition: max-height 0.4s ease, padding 0.3s ease;
     padding: 0 18px;
     background: #fff;
@@ -662,12 +693,36 @@ max-height: 260px;*/
     padding: 20px 18px 25px;
 }
 
+.step-header {
+    display: flex;
+    justify-content: space-between; /* título a la izquierda, tipo a la derecha */
+    align-items: center;
+    margin-bottom: 18px; /* igual que step-title */
+}
+
 .step-title {
     font-size: 1.4rem;
     font-weight: 600;
     color: var(--text-light);
     margin-bottom: 18px;
 }
+
+.qr-selected-type-label {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff22;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.qr-selected-type-label i {
+    margin-right: 6px;
+    font-size: 1rem;
+}
+
 
 .qr-steps {
     display: flex;
@@ -724,6 +779,10 @@ max-height: 260px;*/
 
 
 /* Campos */
+
+.qr-config-fields div{
+    padding: 3px;
+}
 /* Inputs y selects dentro del acordeón */
 .qr-config-fields .qr-input,
 .qr-config-fields .qr-textarea,
@@ -1007,12 +1066,12 @@ max-height: 260px;*/
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-    .style-glass .qr-shape-btn.selected {
-        background: linear-gradient(145deg, #0FBF9F, #0ea5e9);
-        border: none;
-        color: #fff;
-        box-shadow: 0 0 18px rgba(15,191,159,0.8);
-    }
+.style-glass .qr-shape-btn.selected {
+    background: linear-gradient(145deg, #0FBF9F, #0ea5e9);
+    border: none;
+    color: #fff;
+    box-shadow: 0 0 18px rgba(15,191,159,0.8);
+}
 
 /* ============================================================
    RESPONSIVE OPTIMIZADO - SIN ROMPER DESKTOP
@@ -1051,7 +1110,8 @@ max-height: 260px;*/
     }
 
     .hero-grid {
-        /*grid-template-columns: 1fr 1fr;*/ /* 2 columnas iguales */
+        grid-template-columns: 3fr 1fr; 
+        /*grid-template-columns: 1fr minmax(200px, 300px);*/
         gap: 1.5rem;
     }
 
@@ -1063,13 +1123,14 @@ max-height: 260px;*/
 
     /* Selector */
     .selector-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* fluido */
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 12px;
     }
-
     .selector-item {
-        padding: 0.8rem;
-        font-size: 0.9rem;
+        /*flex: 1 1 calc(33.333% - 8px);*/ /* 3 por fila */
+        /*max-width: calc(33.333% - 8px);*/
+        padding: 10px 6px; /* menos padding */
+        font-size: 0.8rem; /* texto más compacto */
     }
 
     .selector-item i {
@@ -1112,7 +1173,7 @@ max-height: 260px;*/
 @media (max-width: 1023px) and (min-width: 768px) {
     .hero-grid {
         display: grid;
-        grid-template-columns: 1fr 340px; /* preview fija */
+        grid-template-columns: 1fr minmax(220px,340px);
         gap: 10px;
         align-items: flex-start;
     }
@@ -1125,11 +1186,10 @@ max-height: 260px;*/
     }
 
     .selector-item {
-        flex: 1 1 calc(33.333% - 8px); /* 3 por fila */
-        padding: 10px 6px; /* 🔥 más compacto */
-        font-size: 0.8rem; /* texto más pequeño */
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        flex: 1 1 calc(33.333% - 8px);
+        max-width: calc(33.333% - 8px);
+        padding: 10px 6px; /* menos padding */
+        font-size: 0.8rem; /* texto más compacto */
     }
 
     .selector-item i {
@@ -1175,7 +1235,7 @@ max-height: 260px;*/
     }
 }
 
-
+/*
 @media (max-width: 900px) {
     .selector-item {
         padding: 1rem;
@@ -1185,72 +1245,12 @@ max-height: 260px;*/
         font-size: 2.2rem;
         margin-bottom: 30px;
     }
-}
+}*/
 
 
 /* 📱 Optimización específica para tablets medianos (768–850px) */
 @media (min-width: 768px) and (max-width: 850px) {
-    .hero-grid {
-        grid-template-columns: 1fr 340px; /* preview un poco más compacta */
-        gap: 0.8rem; /* menos separación */
-        align-items: start;
-    }
 
-    /* Ajuste de cards */
-    .selector-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px; /* 🔥 menos espacio entre botones */
-        justify-content: flex-start;
-    }
-
-    .selector-item {
-        flex: 1 1 calc(33.333% - 8px); /* 3 por fila */
-        max-width: calc(33.333% - 8px);
-        padding: 10px 6px; /* menos padding */
-        font-size: 0.8rem; /* texto más compacto */
-    }
-
-    .selector-item i {
-        font-size: 1.2rem; /* iconos más chicos */
-        margin-bottom: 4px;
-    }
-
-    /* Paso y título */
-    .step-title {
-        font-size: 1.1rem;
-        margin-bottom: 12px;
-    }
-
-    .qr-steps {
-        margin: 12px 0 18px;
-    }
-
-    /* Preview QR más ajustada */
-    .qr-preview-card {
-        max-width: 340px;
-        padding: 14px 12px;
-    }
-
-    .qr-preview-card h4 {
-        font-size: 0.9rem;
-        margin-bottom: 8px;
-    }
-
-    .download-buttons {
-        gap: 8px;
-        margin-top: 10px;
-    }
-
-    .download-buttons button {
-        font-size: 0.8rem;
-        padding: 8px 10px;
-    }
-}
-
-
-
-@media (max-width: 768px) {
     .nav-menu {
         display: none;
     }
@@ -1259,7 +1259,6 @@ max-height: 260px;*/
         display: block;
     }
 
-    /* Hero más compacto */
     .hero {
         padding: 40px 14px;
     }
@@ -1275,7 +1274,43 @@ max-height: 260px;*/
         margin-bottom: 12px;
     }
 
-    /* Preview card */
+
+    .hero-grid {
+        grid-template-columns: 1fr 340px; /* preview un poco más compacta */
+        gap: 0.8rem; /* menos separación */
+        align-items: start;
+    }
+
+    /* Ajuste de cards */
+    .selector-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px; /* 🔥 menos espacio entre botones */
+        justify-content: flex-start;
+    }
+
+    .selector-item {
+        flex: 1 1 calc(33.333% - 8px);
+        max-width: calc(33.333% - 8px);
+        padding: 10px 6px; /* menos padding */
+        font-size: 0.8rem; /* texto más compacto */
+    }
+
+    .selector-item i {
+        font-size: 1.4rem;
+    }
+
+    /* Paso y título */
+    .step-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .qr-steps {
+        margin: 12px 0 18px;
+    }
+
+    /* Preview QR más ajustada */
     .qr-preview-card {
         margin-top: 30px;
         padding: 18px 16px;
@@ -1286,18 +1321,6 @@ max-height: 260px;*/
         margin-bottom: 12px;
     }
 
-    /* Selector item */
-    .selector-item {
-        padding: 0.8rem;
-        font-size: 0.9rem;
-        gap: 0.3rem;
-    }
-
-    .selector-item i {
-        font-size: 1.4rem;
-    }
-
-    /* Inputs y selects */
     .qr-config-fields .qr-input,
     .qr-config-fields .qr-textarea,
     .qr-config-fields .qr-select {
@@ -1315,19 +1338,6 @@ max-height: 260px;*/
     .wizard-actions .btn {
         font-size: 0.95rem;
         padding: 10px 14px;
-    }
-
-    /* Download buttons */
-    .download-buttons {
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .download-buttons button {
-        font-size: 0.95rem;
-        padding: 10px 14px;
-        border-radius: 8px;
     }
 
     .accordion-toggle {
@@ -1370,10 +1380,75 @@ max-height: 260px;*/
     }
 }
 
+
+
+@media (max-width: 768px) {
+    .accordion-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: var(--primary-color);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin: 12px 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transition: all 0.3s ease;
+    }
+
+    .accordion-toggle:hover {
+        background: var(--primary-color-hover);
+        transform: translateY(-2px);
+    }
+
+    /* 🔹 Grid colapsable: en mobile inicia oculto */
+    .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* 🔹 Cuando está activo */
+    .accordion-content.active {
+        max-height: 1500px; /* suficiente para todas las cards */
+        opacity: 1;
+        margin-top: 12px;
+    }
+
+
+    .qr-steps {
+        display: none;
+    }
+
+    .step-title {
+        display: none;
+    }
+
+    .qr-steps .step-line {
+        display: none; /* quitar líneas en columna */
+    }
+}
+
 /* 📱 Móviles medianos (600–767px) */
-@media (max-width: 767px) and (min-width: 601px) {
+@media (max-width: 767px) and (min-width: 600px) {
+
+    .nav-menu {
+        display: none;
+    }
+
+    .burger {
+        display: block;
+    }
+
     .hero-grid {
-        grid-template-columns: 1fr 300px; /* preview más compacta a la derecha */
+        grid-template-columns: 1fr 340px;
         gap: 0.8rem;
         align-items: start;
     }
@@ -1381,15 +1456,15 @@ max-height: 260px;*/
     .selector-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px; /* menos espacio entre botones */
+        gap: 8px; /* 🔥 menos espacio entre botones */
         justify-content: flex-start;
     }
 
     .selector-item {
-        flex: 1 1 calc(50% - 8px); /* 🔥 2 botones por fila */
-        max-width: calc(50% - 8px);
-        padding: 10px 6px;
-        font-size: 0.8rem;
+        flex: 1 1 calc(33.333% - 8px);
+/*        max-width: calc(33.333% - 8px);*/
+        padding: 10px 6px; /* menos padding */
+        font-size: 0.8rem; /* texto más compacto */
     }
 
     .selector-item i {
@@ -1428,83 +1503,12 @@ max-height: 260px;*/
         font-size: 0.8rem;
         padding: 8px 10px;
     }
-}
 
-/* 📱 Rango 480–599px → 2 columnas balanceadas */
-@media (max-width: 600px) and (min-width: 480px) {
-    .hero-grid {
-        grid-template-columns: 1fr 240px; /* preview un poco más angosta */
-        gap: 0.75rem;
-        align-items: flex-start;
-    }
-
-    /* Cards en 2 columnas comprimidas */
-    .selector-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); /* fuerza 2 botones por fila */
+    /* Botones de acción (atrás / generar) */
+    .wizard-actions {
+        flex-direction: column;
         gap: 8px;
-    }
-
-    .selector-item {
-        padding: 8px 6px;
-        font-size: 0.8rem;
-        border-radius: 10px;
-    }
-
-    /* Preview más compacto */
-    .qr-preview-card {
-        max-width: 240px;
-        padding: 12px 10px;
-    }
-
-    .qr-preview-card h4 {
-        font-size: 0.9rem;
-    }
-
-    .qr-preview-card svg {
-        max-width: 200px;
-        max-height: 200px;
-    }
-
-    /* Botones de descarga comprimidos */
-    .download-buttons button {
-        font-size: 0.8rem;
-        padding: 8px 10px;
-    }
-
-    /* Texto de pasos */
-    .qr-steps .step-label {
-        font-size: 0.7rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .hero {
-        padding: 30px 10px;
-    }
-
-    .hero h1 {
-        font-size: 1.3rem;
-    }
-
-    .hero p {
-        font-size: 0.85rem;
-    }
-
-    .hero-grid {
-        grid-template-columns: 1fr; /* solo una columna */
-    }
-
-    .selector-grid {
-        grid-template-columns: 1fr; /* botones full-width */
-    }
-
-    .qr-preview-card {
-        padding: 14px 12px;
-    }
-
-    .qr-preview-card h4 {
-        font-size: 0.9rem;
+        margin-top: 16px;
     }
 
     /* Reducir botones */
@@ -1514,38 +1518,148 @@ max-height: 260px;*/
         padding: 8px 12px;
     }
 
+    .wizard-actions .btn {
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 8px 10px;
+        border-radius: 6px;
+    }
+}
+
+/* 📱 Rango 480–599px → 2 columnas balanceadas */
+@media (max-width: 599px) and (min-width: 480px) {
+
+    .nav-menu {
+        display: none;
+    }
+
+    .burger {
+        display: block;
+    }
+
     .hero-grid {
-        grid-template-columns: 1fr; /* stack */
+        /*grid-template-columns: 1fr 340px;*/
+        gap: 0.75rem;
+        align-items: flex-start;
     }
 
     .selector-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px; /* 🔥 menos espacio entre botones */
+        justify-content: flex-start;
     }
 
     .selector-item {
-        width: 100%;
+        flex: 1 1 calc(33.333% - 8px);
+        max-width: calc(33.333% - 8px);
+        padding: 10px 6px; /* menos padding */
+        font-size: 0.8rem; /* texto más compacto */
     }
 
+    /* Preview */
     .qr-preview-card {
-        max-width: 100%;
-        margin: 0 auto;
+        max-width: 260px; /* 🔹 un poco más ancho */
+        padding: 14px 12px;
+    }
+
+    .qr-preview-card h4 {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
     }
 
     .qr-preview-card svg {
-        max-width: 350px;
-        max-height: 350px;
+        max-width: 280px;
+        max-height: 280px;
+    }
+
+    /* Botones de descarga */
+    /*.download-buttons {
+        flex-direction: column;*/ /* 🔹 apilados verticalmente */
+        /*gap: 8px;
+    }
+
+    .download-buttons button {
+        font-size: 0.9rem;
+        padding: 10px 12px;
+        border-radius: 8px;
+    }*/
+
+    /* Pasos */
+    .qr-steps .step-label {
+        font-size: 0.75rem;
+    }
+
+    /* Botones de descarga */
+    .download-buttons {
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 12px;
+        border-top: none;
+        padding: 0px;
+    }
+
+    .download-buttons button {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+    }
+
+
+    /* Botones de acción (atrás / generar) */
+    .wizard-actions {
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 16px;
+    }
+
+    /* Reducir botones */
+    .download-buttons button,
+    .wizard-actions .btn {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+
+    .wizard-actions .btn {
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 8px 10px;
+        border-radius: 6px;
     }
 }
 
 
 /* 📱 Extra compacto: 375px–425px */
-@media (max-width: 425px) and (min-width: 361px) {
+@media (max-width: 479px) and (min-width: 361px) {
+
+    .nav-menu {
+        display: none;
+    }
+
+    .burger {
+        display: block;
+    }
+
+    .hero {
+        padding: 30px 10px;
+    }
 
     /* Texto del título más reducido */
     .hero h1 {
         font-size: 1.2rem;
         margin-bottom: 12px;
+    }
+
+    .hero p {
+        font-size: 0.85rem;
+    }
+
+    .hero-grid {
+        grid-template-columns: 1fr; /* stack */
+    }
+
+    .selector-grid {
+        grid-template-columns: 1fr; /* botones full-width */
+        gap: 10px;
     }
 
     /* Pasos → mucho más chicos */
@@ -1569,9 +1683,9 @@ max-height: 260px;*/
     }
 
     /* Paso 1 / 2 / 3 título */
+
     .step-title {
-        font-size: 1rem;
-        margin-bottom: 10px;
+        display: none;
     }
 
     /* Acordeón más compacto */
@@ -1594,6 +1708,13 @@ max-height: 260px;*/
         margin-top: 16px;
     }
 
+    /* Reducir botones */
+    .download-buttons button,
+    .wizard-actions .btn {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+
     .wizard-actions .btn {
         width: 100%;
         font-size: 0.8rem;
@@ -1602,7 +1723,10 @@ max-height: 260px;*/
     }
 
     /* Card de preview */
+
     .qr-preview-card {
+        max-width: 100%;
+        margin: 0 auto;
         padding: 14px 12px;
         margin-top: 16px;
     }
@@ -1610,6 +1734,7 @@ max-height: 260px;*/
     .qr-preview-card h4 {
         font-size: 0.85rem;
     }
+
 
     .qr-preview-card svg {
         max-width: 300px;
@@ -1629,40 +1754,55 @@ max-height: 260px;*/
         font-size: 0.8rem;
         padding: 8px 10px;
     }
+
+    .hero-grid {
+        gap: 0.5rem;
+    }
+    .selector-grid {
+        margin-bottom: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .qr-accordion {
+        margin-bottom: 0.5rem;
+    }
+
+    .qr-preview-card {
+        margin: 0.5rem;
+        padding: 0.5rem
+    }
 }
 
 
 /* Muy pequeños <= 360px (ej: 320px) */
 @media (max-width: 360px) {
+    .nav-menu {
+        display: none;
+    }
+
+    .burger {
+        display: block;
+    }
+
     .hero {
         padding: 20px 10px; /* menos padding lateral */
     }
 
     .hero-grid {
         grid-template-columns: 1fr; /* full stack */
-        gap: 0.8rem;
+        gap: 0rem;
     }
 
     .hero-grid > h1 {
         font-size: 1.2rem; /* más compacto */
-        line-height: 1.3;
+        /*line-height: 1.3;*/
+        margin:0.5rem;
     }
 
-    .qr-steps {
-        display: none;
-    }
-
-    .step-title {
-        display: none;
-    }
-
-    .qr-steps .step-line {
-        display: none; /* quitar líneas en columna */
-    }
 
     .selector-grid {
         grid-template-columns: 1fr; /* botones full-width */
-        gap: 8px;
+        gap: 0px;
+        margin: 0.5rem;
     }
 
     .selector-item {
@@ -1739,11 +1879,11 @@ max-height: 260px;*/
     .selector-grid {
         grid-template-columns: 1fr;
     }
-
+/*
     .qr-preview-card {
         margin-top: 20px;
         padding: 12px;
-    }
+    }*/
 
     /* Tabs compactos */
     .qr-tabs .tab {
@@ -1806,5 +1946,18 @@ max-height: 260px;*/
         font-size: 0.8rem;
         padding: 8px 12px;
         border-radius: 8px;
+    }
+
+    .accordion-toggle {
+        margin: 0.5rem;
+    }
+
+    .qr-accordion {
+        margin-bottom: 0.5rem;
+    }
+
+    .qr-preview-card {
+        margin: 0.5rem;
+        padding: 0.5rem
     }
 }

@@ -1,7 +1,7 @@
 ﻿@using CustomizableQrCode.Models
 @using static CustomizableQrCode.Models.QrModels
 
-<div class="combo-visual-group">
+@* <div class="combo-visual-group">
     <div class="qr-option-grid style-glass">
         @foreach (var shape in EyeCenterShapes)
         {
@@ -10,6 +10,21 @@
             <button type="button"
                     class="qr-shape-btn @(SelectedEyeShape == shape.Id ? "selected" : "") @(isDisabled ? "disabled" : "")"
                     disabled="@isDisabled"
+                    @onclick="() => SelectEyeShape(shape.Id)"
+                    title="@shape.Name"
+                    aria-label="@shape.Name">
+                @shape.Svg
+            </button>
+        }
+    </div>
+</div> *@
+
+<div class="combo-visual-group">
+    <div class="qr-option-grid style-glass">
+        @foreach (var shape in EyeCenterShapes)
+        {
+            <button type="button"
+                    class="qr-shape-btn @(SelectedEyeShape == shape.Id ? "selected" : "")"
                     @onclick="() => SelectEyeShape(shape.Id)"
                     title="@shape.Name"
                     aria-label="@shape.Name">
